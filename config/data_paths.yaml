@@ -1,0 +1,51 @@
+# Data Paths Configuration
+
+# Raw data from NinjaTrader
+raw_data:
+  directory: "data/raw"
+  format: "csv"  # csv, parquet, or json
+
+  # Historical data files
+  historical:
+    nq: "data/raw/NQ_M1_6months.csv"
+    es: "data/raw/ES_M1_6months.csv"
+
+  # Live data (streamed from NinjaTrader)
+  live_endpoint: "http://localhost:5001/raw"
+
+# Processed features
+processed_data:
+  directory: "data/processed"
+  features: "data/processed/features.parquet"
+  normalized: "data/processed/features_normalized.parquet"
+
+# Training datasets
+datasets:
+  directory: "data/datasets"
+  train: "data/datasets/outcome_train.pt"
+  val: "data/datasets/outcome_val.pt"
+  test: "data/datasets/outcome_test.pt"
+
+  # Metadata
+  label_stats: "data/datasets/label_statistics.json"
+  feature_names: "data/datasets/feature_names.json"
+
+# Model weights
+models:
+  directory: "models"
+  latest: "models/outcome_transformer_latest.pt"
+  best: "models/outcome_transformer_best.pt"
+
+  # Versioned models
+  versioned: "models/outcome_v{date}.pt"  # {date} = YYYYMMDD
+
+# Normalization statistics
+normalization:
+  stats: "data/processed/normalization_stats.json"
+
+# Logs
+logs:
+  directory: "logs"
+  training: "logs/training_{timestamp}.log"
+  inference: "logs/inference_{timestamp}.log"
+  feature_engine: "logs/feature_engine_{timestamp}.log"

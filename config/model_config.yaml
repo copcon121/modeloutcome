@@ -1,0 +1,102 @@
+# Model Configuration for Outcome Trading System
+
+# Labeling Configuration
+labeling:
+  context_len: 60           # Number of bars for ML context window
+  future_window: 50         # Look-ahead window to compute outcomes
+  stop_R: 1.0              # Stop loss in R-multiples
+  target_R: 2.0            # Take profit in R-multiples
+  min_bars_after: 50       # Don't label bars within this distance from end
+  atr_period: 14           # ATR period for R calculation
+
+# Feature Engineering
+features:
+  normalize_method: "zscore"  # "zscore" or "minmax"
+  ohlcv:
+    include_delta: true
+    include_volume_split: true
+  smc:
+    swing_lookback: 2
+    enable_bos: true
+    enable_choch: true
+    enable_sweep: true
+    enable_ob: true
+    enable_fvg: true
+  volume_profile:
+    price_bins: 50
+    value_area_pct: 0.70    # 70% of volume for value area
+    hvn_threshold: 1.5      # Multiplier for HVN detection
+    lvn_threshold: 0.5      # Multiplier for LVN detection
+  level2:
+    top_n_levels: 10
+    enable_imbalance: true
+  time:
+    enable_session: true
+    enable_sinusoidal: true
+
+# Model Architecture
+model:
+  architecture: "transformer"  # "transformer" or "mlp"
+
+  # Transformer specific
+  transformer:
+    d_model: 128
+    nhead: 4
+    num_encoder_layers: 3
+    dim_feedforward: 256
+    dropout: 0.1
+    pooling: "mean"  # "mean", "max", or "cls"
+
+  # MLP specific (fallback)
+  mlp:
+    hidden_dims: [512, 256, 128]
+    dropout: 0.2
+    activation: "relu"
+
+  # Common
+  num_classes: 3  # long, short, skip
+  output_activation: "softmax"
+
+# Training Configuration
+training:
+  # Data split
+  train_ratio: 0.8
+  val_ratio: 0.2
+
+  # Hyperparameters
+  batch_size: 32
+  learning_rate: 0.0001
+  weight_decay: 0.01
+  epochs: 20
+
+  # Optimization
+  optimizer: "adamw"
+  scheduler: "cosine"  # "cosine", "step", or null
+  warmup_epochs: 2
+
+  # Early stopping
+  patience: 5
+  min_delta: 0.001
+
+  # Loss function
+  loss: "cross_entropy"
+  class_weights: null  # [1.0, 1.0, 0.5] for downweighting skip class
+
+  # Logging
+  log_interval: 100  # Log every N batches
+  save_best_only: true
+  metric_for_best: "val_accuracy"  # or "val_f1"
+
+# Inference Configuration
+inference:
+  device: "cpu"  # "cpu" or "cuda"
+  batch_size: 1
+  confidence_threshold: 0.6  # Minimum probability to act
+  enable_ensemble: false     # Future: ensemble of models
+
+# Paths (relative to project root)
+paths:
+  data_root: "data"
+  models_dir: "models"
+  logs_dir: "logs"
+  config_dir: "config"
