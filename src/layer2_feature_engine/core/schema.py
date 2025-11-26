@@ -25,6 +25,12 @@ class RawBar:
     buy_volume: Optional[float] = 0.0
     sell_volume: Optional[float] = 0.0
 
+    # Tick features (from NinjaTrader)
+    tick_speed: Optional[float] = 0.0       # Total ticks in bar (activity level)
+    aggr_buy_speed: Optional[float] = 0.0   # Aggressive buy volume
+    aggr_sell_speed: Optional[float] = 0.0  # Aggressive sell volume
+    price_speed: Optional[float] = 0.0      # Intrabar price movement (H - L)
+
     # Optional Level 2 depth data
     l2_bid_depth: Optional[List[float]] = field(default_factory=list)
     l2_ask_depth: Optional[List[float]] = field(default_factory=list)
