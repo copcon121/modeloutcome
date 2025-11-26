@@ -7,9 +7,11 @@ A complete 3-layer ML trading system with outcome-based predictions (long/short/
 This system predicts trading outcomes based on **R-multiple** (risk-reward ratio) rather than simple price direction. It uses a context window of 60-100 bars with rich features including:
 
 - **OHLCV** + Delta/Orderflow
-- **SMC** (Smart Money Concepts): Swing, BOS, CHoCH, Order Blocks, Fair Value Gaps
-- **Volume Profile**: VAH, VAL, POC, HVN, LVN
-- **Level 2 Market Depth**: Bid/Ask pressure, imbalance
+- **Tick Features** (tick_speed, aggr_buy_speed, aggr_sell_speed, price_speed) - from NinjaTrader
+- **SMC** (Smart Money Concepts): Swing, BOS, CHoCH, Order Blocks, Fair Value Gaps - **built in Python**
+- **Volume Profile**: VAH, VAL, POC, HVN, LVN - **built in Python**
+- **Multi-Timeframe**: M5 built from M1 in Python
+- **Market Depth**: Bid/Ask, spread
 
 **Model Output**: Probabilities for 3 actions
 - `prob_long`: Enter LONG position
@@ -103,13 +105,41 @@ Follow the detailed instructions in [PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN
 
 ## 📊 System Architecture
 
-### Layer 1: NinjaTrader Adapter (C#)
-- Exports raw OHLCV bars via HTTP POST
+### 🎯 Pro Mode (Recommended)
+
+NinjaTrader exports **Raw + Tick Features**:
+- OHLCV: open, high, low, close, volume
+- Delta: delta, buy_volume, sell_volume
+- Bid/Ask: best_bid, best_ask, spread
+- Tick Features: tick_speed, aggr_buy_speed, aggr_sell_speed, price_speed
+
+Python handles **ALL advanced processing**:
+- SMC structure (BOS/CHOCH/Sweep/OB/FVG)
+- Volume Profile (VAH/VAL/POC)
+- Multi-Timeframe M5 from M1
+- Normalization and scaling
+
+### Layer 1: NinjaTrader Adapter (C#) - SMC_Exporter_Pro_v3
+- Indicator: `SMC_Exporter_Pro_v3` trên NinjaTrader 8.0.28
+- Export **raw OHLCV + tick features** per M1 bar vào file `.jsonl`
+- Delta chuẩn từ indicator `Volumdelta` (DeltasClose[1])
+- Tick features computed realtime:
+  - `tick_speed`: Tổng số tick trong bar
+  - `aggr_buy_speed`: Buy volume của bar
+  - `aggr_sell_speed`: Sell volume của bar
+  - `price_speed`: Intrabar range (H - L)
+- Visual panel hiển thị 4 tick features để validation
+- File xuất: `Documents/NinjaTrader 8/SMC_Exports/<FileName>.jsonl`
 - See [src/layer1_ninjatrader/README.md](src/layer1_ninjatrader/README.md)
 
 ### Layer 2: Feature Engine (Python)
-- Receives bars from Layer 1
-- Computes SMC, Volume Profile, L2 features
+- Receives raw + tick features from Layer 1
+- **Builds ALL derived features**:
+  - SMC structure detection (BOS/CHOCH/Sweep/OB/FVG) from raw M1 bars
+  - Volume Profile calculation (VAH/VAL/POC) from raw M1 bars
+  - Multi-Timeframe M5 aggregation from M1 bars
+  - Tick feature derivatives (tick_speed_ma, tick_acceleration, etc.)
+  - Normalization and feature scaling
 - Runs on port **5001**
 
 ### Layer 3: Model Server (Python)
@@ -120,8 +150,83 @@ Follow the detailed instructions in [PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN
 
 **Full Pipeline Flow:**
 ```
-NinjaTrader → Feature Engine (5001) → Model Server (5002) → Predictions
+NinjaTrader (Raw + Tick Features) → Feature Engine (5001) → Model Server (5002) → Predictions
 ```
+
+---
+
+## 📋 JSON Schema (Per Bar) - SMC_Exporter_Pro_v3 Format
+
+NinjaTrader exports mỗi bar M1 theo schema này:
+
+```json
+{
+  "symbol": "GC 02-26",
+  "timeframe": "M1",
+  "timestamp": "2025-11-17T20:01:00.0000000",
+  "bar_index": 1260,
+
+  "bar": {
+    "o": 4047.8,
+    "h": 4049.1,
+    "l": 4043.2,
+    "c": 4048.9,
+    "volume": 850,
+
+    // Delta chuẩn từ Volumdelta.DeltasClose[1]
+    "delta": -77,
+
+    // Suy ra từ volume + delta
+    "buy_volume": 386.5,   // (volume + delta) / 2
+    "sell_volume": 463.5,  // volume - buy_volume
+
+    // Stub: dùng close của bar
+    "best_bid": 4048.9,
+    "best_ask": 4048.9
+  },
+
+  "tick_features": {
+    // Tổng số Last tick trong bar
+    "tick_speed": 1404,
+
+    // Dùng trực tiếp buy/sell volume
+    "aggr_buy_speed": 386.5,
+    "aggr_sell_speed": 463.5,
+
+    // Intrabar range
+    "price_speed": 5.9  // High - Low
+  }
+}
+```
+
+### Tick Features Explained
+
+- **delta**: Delta bar từ Volumdelta indicator (gần footprint nhất, sai khác vài lot chấp nhận được)
+  - ❌ KHÔNG tính bằng uptick/downtick thủ công
+  - ✅ Lấy trực tiếp từ `Volumdelta.DeltasClose[1]`
+
+- **buy_volume / sell_volume**: Phân rã volume theo delta
+  - `buy_volume = (volume + delta) / 2`
+  - `sell_volume = volume - buy_volume`
+  - Dùng cho feature ML (không nhất thiết trùng 100% footprint)
+
+- **tick_speed**: Tổng số tick (price updates) trong bar
+  - KHÔNG chia cho thời gian
+  - High (>1000 cho M1) = high volatility/activity
+  - Low (<500 cho M1) = consolidation
+
+- **aggr_buy_speed**: Buy volume của bar (giao dịch chủ động mua)
+  - Dùng trực tiếp buy_volume (KHÔNG chia cho thời gian)
+  - So sánh với aggr_sell_speed cho momentum direction
+
+- **aggr_sell_speed**: Sell volume của bar (giao dịch chủ động bán)
+  - Dùng trực tiếp sell_volume (KHÔNG chia cho thời gian)
+  - aggr_sell_speed > aggr_buy_speed = bearish momentum
+
+- **price_speed**: Intrabar range (biên độ giá)
+  - `price_speed = High - Low` (KHÔNG chia cho thời gian)
+  - High value = wide range, volatility
+  - Low value = narrow range, consolidation
 
 ## 🔧 Configuration
 
@@ -226,6 +331,7 @@ docker run -p 5002:5002 outcome-model-server
 - **Feature extraction**: <100ms per bar update
 - **End-to-end latency**: <200ms (NinjaTrader → Decision)
 - **Model accuracy**: >50% (baseline: 33% for 3-class)
+- **Dataset**: NO token limit (tabular numeric model, not LLM)
 
 ## 🛠️ Development
 

@@ -8,10 +8,11 @@ Dự án này xây dựng một hệ thống ML trading hoàn chỉnh với mô 
 ### Định nghĩa Outcome
 - **Input Context**: 40-100 bar M1 (1 phút) với features phong phú:
   - OHLCV cơ bản
-  - Delta và orderflow
-  - SMC structure (Swing, BOS, CHoCH, Sweep, OB, FVG)
-  - Volume Profile (VAH, VAL, POC, HVN, LVN)
-  - Level 2 Market Depth (bid/ask pressure, imbalance)
+  - Delta và orderflow (buy_volume, sell_volume)
+  - **Tick Features** (tick_speed, aggr_buy_speed, aggr_sell_speed, price_speed)
+  - SMC structure (Swing, BOS, CHoCH, Sweep, OB, FVG) - *computed in Python*
+  - Volume Profile (VAH, VAL, POC, HVN, LVN) - *computed in Python*
+  - Market Depth (bid/ask, spread)
 
 - **Output**: Xác suất 3 hành động cho mỗi bar candidate
   - `prob_long`: Xác suất nên vào lệnh LONG
@@ -36,54 +37,135 @@ Dự án này xây dựng một hệ thống ML trading hoàn chỉnh với mô 
 
 ## 2. Kiến trúc 3 Layer
 
-### Layer 1: NinjaTrader Adapter (C#)
-**Nhiệm vụ**: Thu thập và xuất raw market data từ NinjaTrader 8
+### Layer 1: NinjaTrader Adapter (C#) - SMC_Exporter_Pro_v3
+**Nhiệm vụ**: Thu thập và xuất **raw OHLCV + tick features** từ NinjaTrader 8.0.28
+
+**Indicator**: `SMC_Exporter_Pro_v3`
+- Chạy trên khung M1 (có thể mở rộng M5, M15 sau)
+- Export file `.jsonl` (1 bar = 1 dòng JSON) vào: `Documents/NinjaTrader 8/SMC_Exports/<FileName>.jsonl`
 
 **Input**:
 - Live market data stream từ NinjaTrader (OHLCV, Volume, Tick data)
-- Rithmic API data (Delta, Level 2 depth)
+- **Delta chuẩn** từ indicator `Volumdelta` (field `DeltasClose[1]`)
+- OnMarketData events để đếm tick
 
-**Output**:
-- JSON payload qua HTTP POST đến Feature Engine
-- Format: `{"symbol": "NQ", "timeframe": "1m", "bars": [...]}`
+**Output - Pro Mode Recommended**:
+- File JSONL với mỗi bar M1 export:
+  1. **OHLCV**: o, h, l, c, volume
+  2. **Orderflow**: delta (từ Volumdelta), buy_volume, sell_volume (suy ra từ volume + delta)
+  3. **Market Depth stub**: best_bid, best_ask (đặt = close của bar, không dùng spread thật)
+  4. **Tick Features**: tick_speed, aggr_buy_speed, aggr_sell_speed, price_speed
+
+**Lưu ý quan trọng**:
+- ❌ **KHÔNG** dùng uptick/downtick thủ công để tính delta
+- ✅ Delta trong JSON = delta từ indicator `Volumdelta` (gần footprint nhất, sai khác vài lot là chấp nhận được)
+- ✅ `buy_volume = (volume + delta) / 2`, `sell_volume = volume - buy_volume`
+- ✅ `best_bid` / `best_ask` chỉ là stub (= close), không export spread thật
+
+**JSON Schema per bar** (Actual Format từ SMC_Exporter_Pro_v3):
+```json
+{
+  "symbol": "GC 02-26",
+  "timeframe": "M1",
+  "timestamp": "2025-11-17T20:01:00.0000000",
+  "bar_index": 1260,
+
+  "bar": {
+    "o": 4047.8,
+    "h": 4049.1,
+    "l": 4043.2,
+    "c": 4048.9,
+    "volume": 850,
+
+    // Delta chuẩn lấy từ Volumdelta.DeltasClose[1]
+    "delta": -77,
+
+    // Suy ra từ volume + delta:
+    // buy_volume = (volume + delta) / 2 = (850 + (-77)) / 2 = 386.5
+    // sell_volume = volume - buy_volume = 850 - 386.5 = 463.5
+    "buy_volume": 386.5,
+    "sell_volume": 463.5,
+
+    // Stub: dùng close của bar (không phải bid/ask thật)
+    "best_bid": 4048.9,
+    "best_ask": 4048.9
+  },
+
+  "tick_features": {
+    // Tổng số Last tick mà NinjaTrader nhận được trong bar
+    "tick_speed": 1404,
+
+    // Dùng luôn buy/sell volume của bar như tốc độ giao dịch chủ động
+    "aggr_buy_speed": 386.5,
+    "aggr_sell_speed": 463.5,
+
+    // Intrabar range = High[1] - Low[1]
+    "price_speed": 5.9
+  }
+}
+```
+
+**Giải thích**:
+- `delta`: Delta bar từ Volumdelta indicator (gần footprint nhất trong môi trường Ninja)
+- `buy_volume` / `sell_volume`: Phân rã volume theo delta, dùng cho feature ML (không nhất thiết trùng 100% footprint)
+- `tick_speed`: Tổng số tick (price updates) trong bar
+- `aggr_buy_speed` / `aggr_sell_speed`: Dùng trực tiếp buy/sell volume (không chia cho thời gian)
+- `price_speed`: Intrabar range (High - Low)
+- `best_bid` / `best_ask`: Stub value = close (không export spread thật)
+
+**Visual Verification Panel** (trong SMC_Exporter_Pro_v3):
+- NinjaTrader hiển thị panel 4 dòng trên chart:
+  - `tick_speed`: Số tick trong bar
+  - `aggr_buy_speed`: Buy volume
+  - `aggr_sell_speed`: Sell volume
+  - `price_speed`: Intrabar range (H - L)
+- Purpose: Visual validation realtime khi backtest/live
 
 **Đặc điểm**:
 - Non-blocking (fire-and-forget) để không ảnh hưởng chart rendering
 - Có thể export historical data (backtest) hoặc live stream
-- Extensible để thêm orderflow metrics từ Rithmic
+- Calculate tick features realtime during bar formation
 
 ---
 
 ### Layer 2: Feature Engine (Python)
-**Nhiệm vụ**: Chuyển đổi raw bars thành feature vectors phong phú
+**Nhiệm vụ**: Nhận raw + tick features từ Layer 1, xây dựng **TẤT CẢ** derived features phức tạp
 
 **Kiến trúc submodule**:
 
 #### 2.1. `core/`
-- **schema.py**: Định nghĩa data structures (RawBar, FeatureBar, Record)
+- **schema.py**: Định nghĩa data structures (RawBar với tick features, FeatureBar, Record)
 - **normalizer.py**: Chuẩn hóa features (Z-score, Min-Max)
 - **context_manager.py**: Quản lý sliding window context, orchestrate feature building
+- **mtf_builder.py**: Xây dựng Multi-Timeframe M5 từ M1 bars
 
-#### 2.2. `smc/` (Smart Money Concepts)
-- **swing.py**: Phát hiện swing high/low
+#### 2.2. `smc/` (Smart Money Concepts) - **Python xử lý 100%**
+- **swing.py**: Phát hiện swing high/low từ raw M1 bars
 - **structure.py**: Detect BOS (Break of Structure), CHoCH (Change of Character), sweep
 - **zones.py**: Xác định và tracking Order Block (OB), Fair Value Gap (FVG)
+- **Không có SMC logic trong NinjaTrader** - tất cả trong Python
 
-#### 2.3. `volume_profile/`
-- **vp_builder.py**: Xây dựng Volume Profile theo session/window
+#### 2.3. `volume_profile/` - **Python xử lý 100%**
+- **vp_builder.py**: Xây dựng Volume Profile từ raw M1 bars
 - Tính VAH (Value Area High), VAL (Value Area Low), POC (Point of Control)
 - Identify HVN (High Volume Node), LVN (Low Volume Node)
 
-#### 2.4. `orderflow_l2/`
-- **l2_features.py**: Xử lý Level 2 market depth từ Rithmic
-- Tính bid/ask pressure, depth imbalance, aggression indicators
+#### 2.4. `tick_features/`
+- **tick_analyzer.py**: Analyze tick features từ NinjaTrader
+- Derive additional features: tick_speed_ma, tick_acceleration, etc.
 
 #### 2.5. `utils/`
 - **time_features.py**: Session detection (Asia/Europe/US), time-of-day encoding
 - **logging_utils.py**: Centralized logging
 - **config_loader.py**: Load YAML configs
 
-**Input**: Raw JSON từ Layer 1
+**Input**: Raw JSON từ Layer 1 (OHLCV + tick features)
+
+**Processing in Python**:
+- ✅ SMC structure detection (BOS/CHoCH/Sweep/OB/FVG)
+- ✅ Volume Profile calculation (VAH/VAL/POC)
+- ✅ Multi-Timeframe M5 building từ M1
+- ✅ Normalization và feature scaling
 
 **Output**: Feature matrix `[context_len, feature_dim]` sẵn sàng cho model
 
@@ -198,14 +280,24 @@ Record {
 ```
 
 ### Feature Dimensions
-Mỗi **FeatureBar** có khoảng 60-80 features:
+Mỗi **FeatureBar** có khoảng 70-100 features:
 
 **OHLCV Features** (10-15):
 - open, high, low, close, volume (normalized)
 - range, body_size, wick_upper, wick_lower
-- volume_delta, buy_volume, sell_volume
+- volume_ma, volume_ratio
 
-**SMC Features** (15-20):
+**Tick Features** (12-15) - **From NinjaTrader + Derived**:
+- tick_speed (ticks/sec) - raw from NinjaTrader
+- aggr_buy_speed (contracts/sec) - raw from NinjaTrader  
+- aggr_sell_speed (contracts/sec) - raw from NinjaTrader
+- price_speed (points/sec) - raw from NinjaTrader
+- delta, buy_volume, sell_volume - raw from NinjaTrader
+- best_bid, best_ask, spread - raw from NinjaTrader
+- tick_speed_ma, tick_acceleration - derived in Python
+- buy_sell_ratio, delta_normalized - derived in Python
+
+**SMC Features** (15-20) - **Computed in Python**:
 - is_swing_high, is_swing_low
 - bos_up, bos_down, choch_up, choch_down
 - sweep_high, sweep_low
@@ -213,23 +305,66 @@ Mỗi **FeatureBar** có khoảng 60-80 features:
 - dist_to_nearest_fvg_up, dist_to_nearest_fvg_down
 - ob_strength, fvg_size
 
-**Volume Profile Features** (8-10):
+**Volume Profile Features** (8-10) - **Computed in Python**:
 - dist_to_vah, dist_to_val, dist_to_poc
 - at_hvn, at_lvn
 - value_area_position (0-1)
-
-**Level 2 Features** (5-8):
-- l2_bid_pressure, l2_ask_pressure
-- l2_depth_imbalance
-- l2_aggression_buy, l2_aggression_sell
 
 **Time Features** (3-5):
 - session_flag (one-hot: Asia/Europe/US)
 - time_sin, time_cos
 
+**Multi-Timeframe Features** (10-15) - **M5 built in Python**:
+- m5_trend, m5_swing_high, m5_swing_low
+- m5_ob_nearby, m5_fvg_nearby
+
 **Context Size**:
-- Training: Fixed 60 bars (1 hour M1 data)
+- **NO TOKEN LIMIT** (this is tabular numeric data, not LLM)
+- Training: Fixed 60 bars M1 (1 hour context)
 - Inference: Sliding window 60-100 bars
+- Input shape: `[batch, seq_len, features]` e.g., `[32, 60, 85]`
+- Total numeric values: 60 × 85 = 5,100 (tiny compared to LLM)
+
+---
+
+## 4.1. Tick Features Explained
+
+### Tick Speed (tick_speed)
+**Định nghĩa**: Tổng số Last tick (price updates) mà NinjaTrader nhận được trong bar  
+**Công thức**: `tick_speed = total_ticks_in_bar` (KHÔNG chia cho thời gian)  
+**Ý nghĩa**:
+- High tick_speed (>1000 cho M1) → High trading activity, volatility
+- Low tick_speed (<500 cho M1) → Low activity, consolidation
+
+### Aggressive Buy Speed (aggr_buy_speed)
+**Định nghĩa**: Buy volume của bar (giao dịch chủ động mua)  
+**Công thức**: `aggr_buy_speed = buy_volume = (volume + delta) / 2`  
+**Ý nghĩa**:
+- High aggr_buy_speed → Strong buying pressure
+- aggr_buy_speed > aggr_sell_speed → Bullish momentum
+- **Lưu ý**: Không chia cho thời gian, dùng trực tiếp volume
+
+### Aggressive Sell Speed (aggr_sell_speed)
+**Định nghĩa**: Sell volume của bar (giao dịch chủ động bán)  
+**Công thức**: `aggr_sell_speed = sell_volume = volume - buy_volume`  
+**Ý nghĩa**:
+- High aggr_sell_speed → Strong selling pressure
+- aggr_sell_speed > aggr_buy_speed → Bearish momentum
+- **Lưu ý**: Không chia cho thời gian, dùng trực tiếp volume
+
+### Price Speed (price_speed)
+**Định nghĩa**: Intrabar range (biên độ giá trong bar)  
+**Công thức**: `price_speed = High[1] - Low[1]` (KHÔNG chia cho thời gian)  
+**Ý nghĩa**:
+- High price_speed → Wide range, volatility
+- Low price_speed → Narrow range, consolidation
+- Combine với tick_speed để detect breakouts
+
+**Use Cases**:
+- **Breakout detection**: High tick_speed + high price_speed
+- **Momentum direction**: aggr_buy_speed vs aggr_sell_speed
+- **Consolidation**: Low tick_speed + low price_speed
+- **Absorption**: High aggr_sell_speed but price rises (bullish)
 
 ---
 

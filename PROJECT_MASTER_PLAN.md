@@ -88,60 +88,114 @@ This master plan provides a phase-by-phase execution roadmap for building the co
 
 ---
 
-## Phase 1: Layer 1 - NinjaTrader Adapter
+## Phase 1: Layer 1 - NinjaTrader Adapter (SMC_Exporter_Pro_v3)
 
-### Objectives
-- Implement C# strategy to export raw market data
-- Establish HTTP communication with Feature Engine
-- Test data export with historical and live data
+### Module: Tầng 2 – EXPORT-SMC-JSON — NinjaTrader Exporter
+
+**Tên**: `SMC_Exporter_Pro_v3`  
+**Trạng thái**: ĐÃ FIX STABLE  
+**Platform**: NinjaTrader 8.0.28  
+**Khung thời gian**: M1 (có thể mở rộng M5, M15 sau)
+
+###Objectives
+- Implement indicator `SMC_Exporter_Pro_v3` để export raw OHLCV + tick features
+- Đọc delta chuẩn từ indicator `Volumdelta` (field `DeltasClose[1]`)
+- Export file `.jsonl` (1 bar = 1 dòng JSON)
+- Visual panel 4 dòng để verify realtime
 
 ### Checklist
 
-#### 1.1 Develop ExportRawData.cs
+#### 1.1 Develop SMC_Exporter_Pro_v3 (Pro Mode) - ĐÃ FIX STABLE
 ```bash
-- [ ] Create ExportRawData.cs in src/layer1_ninjatrader/
-- [ ] Implement OnBarUpdate() to collect OHLCV data
-- [ ] Add placeholders for:
-      - Delta (buy volume - sell volume)
-      - Bid/Ask volume split
-      - Level 2 depth data (Rithmic integration)
-- [ ] Serialize bar data to JSON format
-- [ ] Implement HTTP POST to http://localhost:5001/raw
-      - Use HttpClient
-      - Fire-and-forget (async, non-blocking)
-      - Error handling (log failures, don't crash)
+- [x] Create SMC_Exporter_Pro_v3.cs trong src/layer1_ninjatrader/
+- [x] OnBarUpdate() export mỗi bar M1 theo format:
+      **OHLCV Data** (shorthand):
+      - o, h, l, c, volume
+      **Delta Features** (từ Volumdelta indicator):
+      - delta = Volumdelta.DeltasClose[1] (CHÚ Ý: không tính uptick/downtick thủ công)
+      - buy_volume = (volume + delta) / 2
+      - sell_volume = volume - buy_volume
+      - best_bid, best_ask = close của bar (stub)
+- [x] Realtime tick features trong OnMarketData():
+      - tick_speed = tổng số Last tick trong bar (KHÔNG chia cho thời gian)
+      - aggr_buy_speed = buy_volume (dùng trực tiếp)
+      - aggr_sell_speed = sell_volume (dùng trực tiếp)
+      - price_speed = High[1] - Low[1] (intrabar range)
+- [x] JSON schema per bar:
+      {
+        "symbol": "GC 02-26",
+        "timeframe": "M1",
+        "timestamp": "2025-11-17T20:01:00.0000000",
+        "bar_index": 1260,
+        "bar": {"o": ..., "h": ..., "l": ..., "c": ..., "volume": ..., 
+                "delta": ..., "buy_volume": ..., "sell_volume": ...,
+                "best_bid": ..., "best_ask": ...},
+        "tick_features": {"tick_speed": ..., "aggr_buy_speed": ..., 
+                         "aggr_sell_speed": ..., "price_speed": ...}
+      }
+- [x] Export vào file: Documents/NinjaTrader 8/SMC_Exports/<FileName>.jsonl
+      - Mỗi bar = 1 dòng JSON
+      - Append mode cho backtest/live stream
 ```
 
-#### 1.2 Create Layer 1 Documentation
+**Lưu ý kỹ thuật quan trọng**:
+- ❌ **KHÔNG** dùng uptick/downtick thủ công để tính delta
+- ✅ Delta lấy từ `Volumdelta.DeltasClose[1]` (gần footprint nhất)
+- ✅ File xuất chuẩn `.jsonl`, 1 bar/line
+- ✅ Đã có panel visual 4 line (tick_speed, buy_volume, sell_volume, price_speed)
+- ✅ Khi backtest/live, chỉ cần bật 1 indicator này trên chart là có full orderflow features
+
+#### 1.2 Visual Tick Features Panel (Verification)
+```bash
+- [ ] Implement OnRender() to display tick features panel:
+      - Panel trên chart hiển thị realtime:
+        * Tick Speed: X.X ticks/sec
+        * Aggr Buy Speed: X.X contracts/sec
+        * Aggr Sell Speed: X.X contracts/sec
+        * Price Speed: X.XXX points/sec
+      - Include progress bars for visualization
+      - Color coding: Green (bullish), Red (bearish), Yellow (neutral)
+- [ ] Purpose: Visual validation that calculations work correctly
+```
+
+#### 1.3 Create Layer 1 Documentation
 ```bash
 - [ ] Write src/layer1_ninjatrader/README.md with:
       - Installation instructions
       - How to attach strategy to chart
       - Configuration parameters (endpoint URL, symbol)
+      - **Tick features explanation** (definitions and formulas)
       - Troubleshooting common issues
-      - TODO notes for Rithmic L2 integration
+      - Note: All SMC/VP/MTF processing done in Python, NOT NinjaTrader
 ```
 
-#### 1.3 Testing
+#### 1.4 Testing
 ```bash
-- [ ] Compile ExportRawData.cs in NinjaTrader
+- [ ] Compile ExportRawDataPro.cs in NinjaTrader
 - [ ] Attach to a chart (historical data)
 - [ ] Set up a simple Python HTTP server to receive POSTs:
       python -m http.server 5001 (or simple FastAPI app)
-- [ ] Verify JSON payloads are received
+- [ ] Verify JSON payloads with new tick_features fields:
+      - Check tick_speed values are reasonable (5-50 range for M1)
+      - Verify aggr_buy_speed + aggr_sell_speed ≈ volume/60
+      - Confirm best_bid < best_ask, spread > 0
+- [ ] Visual panel displays tick features correctly
 - [ ] Test with live data (if market open)
 - [ ] Log any errors and fix
 ```
 
 ### Deliverables
-- ✅ ExportRawData.cs (fully functional)
+- ✅ ExportRawDataPro.cs (fully functional with tick features)
+- ✅ Visual panel showing tick metrics
 - ✅ README.md (clear instructions)
 - ✅ Test results documented
 
 ### Validation Criteria
 - ✅ Strategy compiles without errors
-- ✅ HTTP POST successfully sends data to local server
-- ✅ JSON format is correct and parseable
+- ✅ HTTP POST successfully sends data with tick_features object
+- ✅ JSON format matches schema exactly
+- ✅ Visual panel displays tick features correctly
+- ✅ Tick feature values are reasonable (no NaN, no extreme outliers)
 
 ---
 
@@ -157,7 +211,7 @@ This master plan provides a phase-by-phase execution roadmap for building the co
 #### 2.1 Core Module (`core/`)
 ```bash
 - [ ] Implement schema.py:
-      - RawBar dataclass (ts, open, high, low, close, volume, delta, etc.)
+      - RawBar dataclass: ts, OHLCV + tick features (delta, buy_volume, sell_volume, tick_speed, etc.)
       - FeatureBar dataclass (contains all computed features as dict)
       - Record dataclass (context + label + metadata)
 - [ ] Implement normalizer.py:
@@ -170,41 +224,50 @@ This master plan provides a phase-by-phase execution roadmap for building the co
       - add_bar(bar) method
       - build_features() method that orchestrates all feature modules
       - Return List[FeatureBar]
+- [ ] Implement mtf_builder.py: 🆕
+      - build_m5_from_m1(m1_bars) → aggregated M5 bars
+      - Aggregate 5x M1 bars into 1x M5 bar
+      - Preserve tick features (sum volumes, average speeds)
 ```
 
-#### 2.2 SMC Module (`smc/`)
+#### 2.2 SMC Module (`smc/`) - **Python xử lý 100%**
 ```bash
 - [ ] Implement swing.py:
-      - detect_swings(bars, lookback=2) → List of swing points
+      - detect_swings(bars, lookback=2) → List of swing points (from raw M1 bars)
       - Return indices and types (high/low)
 - [ ] Implement structure.py:
       - compute_structure_flags(bars, swings) → dict with BOS/CHoCH flags
       - extract_bar_structure_features(i, struct_flags) → dict
       - Features: bos_up, bos_down, choch_up, choch_down, sweep_high, sweep_low
+      - **NO NinjaTrader SMC detection** - all done here in Python
 - [ ] Implement zones.py:
-      - detect_fvg(bars) → Fair Value Gaps
-      - detect_ob(bars) → Order Blocks
+      - detect_fvg(bars) → Fair Value Gaps (computed from raw M1 bars)
+      - detect_ob(bars) → Order Blocks (computed from raw M1 bars)
       - extract_zone_features(i, bars) → dict
       - Features: dist_to_fvg_up, dist_to_fvg_down, dist_to_ob_up, dist_to_ob_down
 ```
 
-#### 2.3 Volume Profile Module (`volume_profile/`)
+#### 2.3 Volume Profile Module (`volume_profile/`) - **Python xử lý 100%**
 ```bash
 - [ ] Implement vp_builder.py:
-      - build_volume_profile(bars, price_bins=50) → VolumeProfile object
+      - build_volume_profile(bars, price_bins=50) → VolumeProfile object (from raw M1 bars)
       - Compute VAH, VAL, POC
       - Identify HVN and LVN zones
       - extract_bar_vp_features(i, vp_state, bar) → dict
       - Features: dist_to_vah, dist_to_val, dist_to_poc, at_hvn, at_lvn
 ```
 
-#### 2.4 Orderflow L2 Module (`orderflow_l2/`)
+#### 2.4 Tick Features Module (`tick_features/`) 🆕
 ```bash
-- [ ] Implement l2_features.py:
-      - compute_l2_features(bars) → aggregate L2 depth (placeholder for now)
-      - extract_bar_l2_features(i, l2_state, bar) → dict
-      - Features: l2_bid_pressure, l2_ask_pressure, l2_depth_imbalance
-      - NOTE: Real implementation requires Rithmic API integration
+- [ ] Implement tick_analyzer.py:
+      - Receive tick features from NinjaTrader (already in RawBar)
+      - Derive additional features:
+            * tick_speed_ma (moving average of tick_speed)
+            * tick_acceleration (change in tick_speed)
+            * buy_sell_ratio = aggr_buy_speed / aggr_sell_speed
+            * delta_normalized = delta / volume
+      - extract_bar_tick_features(i, bars) → dict
+      - Features: tick_speed_ma, tick_accel, buy_sell_ratio, etc.
 ```
 
 #### 2.5 Utils Module (`utils/`)
@@ -223,21 +286,25 @@ This master plan provides a phase-by-phase execution roadmap for building the co
 #### 2.6 Integration Testing
 ```bash
 - [ ] Create test script: tests/test_feature_pipeline.py
-- [ ] Load sample raw bars from JSON
+- [ ] Load sample raw bars from JSON (with tick_features)
 - [ ] Run through ContextManager.build_features()
-- [ ] Verify output shape: [num_bars, ~60-80 features]
+- [ ] Verify output shape: [num_bars, ~70-100 features]
 - [ ] Check for NaN values (should be minimal)
+- [ ] Verify tick features are included and normalized
 - [ ] Print sample features for manual inspection
 ```
 
 ### Deliverables
-- ✅ All Layer 2 modules implemented
+- ✅ All Layer 2 modules implemented (including mtf_builder and tick_analyzer)
 - ✅ Integration test passing
 - ✅ Sample feature output saved to `data/processed/sample_features.json`
 
 ### Validation Criteria
 - ✅ No import errors
 - ✅ Feature extraction runs without crashes
+- ✅ Tick features correctly parsed and derived features computed
+- ✅ SMC structure detected from raw M1 bars in Python
+- ✅ Volume Profile built from raw M1 bars in Python
 - ✅ Feature values are reasonable (no extreme outliers unless expected)
 - ✅ Code is documented with comments
 
