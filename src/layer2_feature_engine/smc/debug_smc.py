@@ -70,19 +70,36 @@ def debug_smc_on_sample(data_path: str, n: int = 300):
     ext_choch_up_count = 0
     ext_choch_down_count = 0
 
+    # Track previous swing indices to detect when they change
+    prev_int_swing_high_idx = -1
+    prev_int_swing_low_idx = -1
+    prev_ext_swing_high_idx = -1
+    prev_ext_swing_low_idx = -1
+
     for i in range(len(bars)):
         smc_state = engine.update(bars, i)
         smc_states.append(smc_state)
 
-        # Count events
-        if smc_state.int_swing_high_bars_ago == 0:
+        # Count events by tracking when swing indices change
+        # (not by bars_ago == 0, since incremental detection confirms swings fractal_right bars later)
+        current_int_high_idx = engine.int_swing_detector.state.swing_high_idx
+        current_int_low_idx = engine.int_swing_detector.state.swing_low_idx
+        current_ext_high_idx = engine.ext_swing_detector.state.swing_high_idx
+        current_ext_low_idx = engine.ext_swing_detector.state.swing_low_idx
+
+        if current_int_high_idx != prev_int_swing_high_idx and current_int_high_idx >= 0:
             int_swing_high_count += 1
-        if smc_state.int_swing_low_bars_ago == 0:
+        if current_int_low_idx != prev_int_swing_low_idx and current_int_low_idx >= 0:
             int_swing_low_count += 1
-        if smc_state.ext_swing_high_bars_ago == 0:
+        if current_ext_high_idx != prev_ext_swing_high_idx and current_ext_high_idx >= 0:
             ext_swing_high_count += 1
-        if smc_state.ext_swing_low_bars_ago == 0:
+        if current_ext_low_idx != prev_ext_swing_low_idx and current_ext_low_idx >= 0:
             ext_swing_low_count += 1
+
+        prev_int_swing_high_idx = current_int_high_idx
+        prev_int_swing_low_idx = current_int_low_idx
+        prev_ext_swing_high_idx = current_ext_high_idx
+        prev_ext_swing_low_idx = current_ext_low_idx
 
         if smc_state.int_bos_up:
             int_bos_up_count += 1

@@ -198,44 +198,67 @@ class InternalSwingDetector:
         if current_idx < self.config.fractal_left + self.config.fractal_right:
             return self.state  # Not enough bars yet
 
-        # Detect fractals up to current index
-        fractal_highs, fractal_lows = detect_fractal_pivots(
-            bars[:current_idx + 1],
-            self.config.fractal_left,
-            self.config.fractal_right
-        )
+        # Check if current position (minus right lookback) forms a fractal
+        # This checks if bar at (current_idx - right) is a fractal pivot
+        fractal_check_idx = current_idx - self.config.fractal_right
 
-        # Check for new fractal high
-        if fractal_highs and fractal_highs[-1] not in [self.state.pending_high_idx, self.state.swing_high_idx]:
-            new_frac_idx = fractal_highs[-1]
-            new_frac_price = bars[new_frac_idx].high
+        if fractal_check_idx < self.config.fractal_left:
+            return self.state
 
-            # Try to confirm as internal swing high (wave 5)
-            if self._confirm_internal_swing_high(bars, new_frac_idx, new_frac_price):
-                self.state.swing_high_idx = new_frac_idx
-                self.state.swing_high_price = new_frac_price
+        # Check for fractal high at fractal_check_idx
+        is_fractal_high = True
+        pivot_bar = bars[fractal_check_idx]
+
+        # Check left side
+        for i in range(fractal_check_idx - self.config.fractal_left, fractal_check_idx):
+            if bars[i].high >= pivot_bar.high:
+                is_fractal_high = False
+                break
+
+        # Check right side
+        if is_fractal_high:
+            for i in range(fractal_check_idx + 1, fractal_check_idx + self.config.fractal_right + 1):
+                if bars[i].high >= pivot_bar.high:
+                    is_fractal_high = False
+                    break
+
+        # If fractal high and not already processed
+        if is_fractal_high and fractal_check_idx not in [self.state.pending_high_idx, self.state.swing_high_idx]:
+            if self._confirm_internal_swing_high(bars, fractal_check_idx, pivot_bar.high):
+                self.state.swing_high_idx = fractal_check_idx
+                self.state.swing_high_price = pivot_bar.high
                 self.state.swing_high_confirmed = True
                 self.state.pending_high_idx = -1
             else:
-                # Pending confirmation
-                self.state.pending_high_idx = new_frac_idx
-                self.state.pending_high_price = new_frac_price
+                self.state.pending_high_idx = fractal_check_idx
+                self.state.pending_high_price = pivot_bar.high
 
-        # Check for new fractal low
-        if fractal_lows and fractal_lows[-1] not in [self.state.pending_low_idx, self.state.swing_low_idx]:
-            new_frac_idx = fractal_lows[-1]
-            new_frac_price = bars[new_frac_idx].low
+        # Check for fractal low at fractal_check_idx
+        is_fractal_low = True
 
-            # Try to confirm as internal swing low (wave 5)
-            if self._confirm_internal_swing_low(bars, new_frac_idx, new_frac_price):
-                self.state.swing_low_idx = new_frac_idx
-                self.state.swing_low_price = new_frac_price
+        # Check left side
+        for i in range(fractal_check_idx - self.config.fractal_left, fractal_check_idx):
+            if bars[i].low <= pivot_bar.low:
+                is_fractal_low = False
+                break
+
+        # Check right side
+        if is_fractal_low:
+            for i in range(fractal_check_idx + 1, fractal_check_idx + self.config.fractal_right + 1):
+                if bars[i].low <= pivot_bar.low:
+                    is_fractal_low = False
+                    break
+
+        # If fractal low and not already processed
+        if is_fractal_low and fractal_check_idx not in [self.state.pending_low_idx, self.state.swing_low_idx]:
+            if self._confirm_internal_swing_low(bars, fractal_check_idx, pivot_bar.low):
+                self.state.swing_low_idx = fractal_check_idx
+                self.state.swing_low_price = pivot_bar.low
                 self.state.swing_low_confirmed = True
                 self.state.pending_low_idx = -1
             else:
-                # Pending confirmation
-                self.state.pending_low_idx = new_frac_idx
-                self.state.pending_low_price = new_frac_price
+                self.state.pending_low_idx = fractal_check_idx
+                self.state.pending_low_price = pivot_bar.low
 
         # Update trend direction
         self._update_trend_dir()
@@ -246,45 +269,29 @@ class InternalSwingDetector:
         """
         Confirm fractal high as internal swing high (wave 5)
 
-        Rules:
-        - Must be at least min_int_move_ticks above last internal swing low
-        - Must have min_bars_between_swings since last confirmed swing
+        SIMPLIFIED: Accept all fractals with minimum bars spacing only
         """
-        # Check move size from last swing low
-        if self.state.swing_low_idx >= 0:
-            move_ticks = self.config.price_to_ticks(price - self.state.swing_low_price)
-            if move_ticks < self.config.min_int_move_ticks:
-                return False  # Not enough movement
-
-        # Check minimum bars since last swing high (avoid noise)
+        # Check minimum bars since last swing high (avoid too many swings)
         if self.state.swing_high_idx >= 0:
             bars_since = idx - self.state.swing_high_idx
             if bars_since < self.config.min_bars_between_swings:
-                return False
+                return False  # Too soon
 
-        return True
+        return True  # Accept all other fractals
 
     def _confirm_internal_swing_low(self, bars: List[RawBar], idx: int, price: float) -> bool:
         """
         Confirm fractal low as internal swing low (wave 5)
 
-        Rules:
-        - Must be at least min_int_move_ticks below last internal swing high
-        - Must have min_bars_between_swings since last confirmed swing
+        SIMPLIFIED: Accept all fractals with minimum bars spacing only
         """
-        # Check move size from last swing high
-        if self.state.swing_high_idx >= 0:
-            move_ticks = self.config.price_to_ticks(self.state.swing_high_price - price)
-            if move_ticks < self.config.min_int_move_ticks:
-                return False  # Not enough movement
-
-        # Check minimum bars since last swing low (avoid noise)
+        # Check minimum bars since last swing low (avoid too many swings)
         if self.state.swing_low_idx >= 0:
             bars_since = idx - self.state.swing_low_idx
             if bars_since < self.config.min_bars_between_swings:
-                return False
+                return False  # Too soon
 
-        return True
+        return True  # Accept all other fractals
 
     def _update_trend_dir(self):
         """Update internal trend direction based on swing highs/lows"""
