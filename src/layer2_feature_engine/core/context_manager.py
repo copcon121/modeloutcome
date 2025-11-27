@@ -14,7 +14,7 @@ from .normalizer import Normalizer
 # Import feature extraction modules
 from ..smc import swing, structure, zones
 from ..volume_profile import vp_builder
-from ..orderflow_l2 import l2_features
+from ..orderflow_l2 import l2_features, tick_analyzer
 from ..utils import time_features
 
 
@@ -183,7 +183,7 @@ class ContextManager:
     def _extract_bar_features(self, i: int, bars_list: List[RawBar]) -> Dict[str, float]:
         """
         Extract all features for bar at index i
-        Combines OHLCV, SMC, VP, L2, and time features
+        Combines OHLCV, Tick/Orderflow, SMC, VP, L2, and time features
         """
         bar = bars_list[i]
         features = {}
@@ -191,17 +191,20 @@ class ContextManager:
         # 1. Basic OHLCV features (normalized)
         features.update(self._extract_ohlcv_features(i, bars_list))
 
-        # 2. SMC features
+        # 2. Tick/Orderflow features (from NinjaTrader)
+        features.update(tick_analyzer.extract_tick_features(i, bars_list, lookback=14))
+
+        # 3. SMC features
         features.update(structure.extract_bar_structure_features(i, self.smc_structure))
         features.update(zones.extract_zone_features(i, bars_list, self.smc_structure))
 
-        # 3. Volume Profile features
+        # 4. Volume Profile features
         features.update(vp_builder.extract_bar_vp_features(i, self.vp_state, bar))
 
-        # 4. Level 2 features
+        # 5. Level 2 features
         features.update(l2_features.extract_bar_l2_features(i, self.l2_state, bar))
 
-        # 5. Time features
+        # 6. Time features
         features.update(time_features.extract_time_features(bar.ts))
 
         return features
