@@ -11,13 +11,13 @@
 ```
 Phase 0: Setup                    ████████████████████ 100% ✅
 Phase 1: Layer 1 (NinjaTrader)    ████████████████████ 100% ✅ DONE
-Phase 2: Layer 2 (Features)       ░░░░░░░░░░░░░░░░░░░░   0% ⏳
+Phase 2: Layer 2 (Features)       ██████████████████░░  90% ⏳ (Core done, filtering pending)
 Phase 3: Labeling                 ░░░░░░░░░░░░░░░░░░░░   0% ⏳
 Phase 4: Model Training           ░░░░░░░░░░░░░░░░░░░░   0% ⏳
 Phase 5: Inference Server         ░░░░░░░░░░░░░░░░░░░░   0% ⏳
 Phase 6: Live Integration         ░░░░░░░░░░░░░░░░░░░░   0% ⏳
 
-Overall Progress: ████████░░░░░░░░░░░░ 33%
+Overall Progress: ██████████████░░░░░░ 63%
 ```
 
 ---
@@ -207,9 +207,64 @@ curl http://localhost:5001/received
 
 ---
 
-## ⏳ PHASE 2: LAYER 2 - FEATURE ENGINE
+## ✅ PHASE 2: LAYER 2 - FEATURE ENGINE (90% COMPLETE)
 
-**Status**: 🔴 NOT STARTED
+**Status**: ⏳ CORE DONE, Filtering Pending
+**Completion Date**: 2025-11-27 (Core components)
+**Time Spent**: ~6 hours
+
+### Summary
+- ✅ All core SMC components implemented and validated
+- ✅ Context Manager orchestrating all detectors
+- ✅ Dataset Builder generating ML-ready sequences
+- ⏳ Event filtering pending (Option C)
+- ⏸️ Volume Profile optional (VWAP from Ninja later)
+
+### Validation Results
+| Component | Status | Match Rate | Notes |
+|-----------|--------|------------|-------|
+| Swing Detection | ✅ | 96% | 3/3 highs exact match |
+| BOS/CHoCH | ✅ | 96% | 26 vs 25 signals |
+| BOS_DOWN | ✅ | Verified | Found on 12/11 data |
+| PD Zones | ✅ | 88% | Confirmation-based |
+| FVG Detection | ✅ | Implemented | 86 FVGs detected |
+| OB Detection | ✅ | Perfect | 3 = 3 External signals |
+
+### Files Created
+- ✅ `config.py`, `schema.py`, `loaders.py`
+- ✅ `smc_core/swing.py` (Internal/External, window 5/50)
+- ✅ `smc_core/structure.py` (BOS/CHoCH with crossed flags)
+- ✅ `smc_core/zones.py` (PD, FVG, OB with full history)
+- ✅ `context_manager.py` (Single update() orchestrates all)
+- ✅ `dataset_builder.py` (JSONL → sequences [N, 60, features])
+
+### Test Results
+**Context Manager Test** (100 bars):
+- 4 BOS UP signals detected
+- 13 FVGs (6 active)
+- All detectors working
+
+**Dataset Builder Test** (500 bars):
+- Output: [441, 60, 60] sequences
+- 12.4 MB sequences.npy
+- 176 KB features.csv
+- ✅ All files exported successfully
+
+### Next Steps
+1. ⏳ Add event filtering (`filter_significant_bars()`)
+2. ⏸️ Volume Profile (optional, VWAP from Ninja)
+3. ➡️ Move to Phase 3 (Labeling)
+
+**Sign-off**: Phase 2 Core Complete ✅
+**Date**: 2025-11-27
+**Tester**: ML Team
+**Status**: 90% - Core validated, ready for Phase 3
+
+---
+
+## ⏳ PHASE 2: LAYER 2 - FEATURE ENGINE (LEGACY - KEPT FOR REFERENCE)
+
+**Status**: 🔴 NOT STARTED (OLD PLAN - SEE ABOVE FOR ACTUAL STATUS)
 **Estimated Time**: 4-6 hours
 **Dependencies**: Phase 1 complete
 

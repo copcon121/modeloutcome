@@ -44,6 +44,9 @@ class RawBar:
     aggr_sell_speed: float    # Sell volume (NOT per second)
     price_speed: float        # Intrabar range (H - L)
     
+    # VWAP (from exporter)
+    vwap_daily: float = 0.0   # Daily VWAP from NinjaTrader
+    
     @property
     def is_bullish(self) -> bool:
         """True if close > open"""
@@ -317,7 +320,11 @@ class FeatureBar:
     vp_dist_to_vah: float
     vp_dist_to_val: float
     
-    # TOTAL: ~59 features
+    # ===== 7. VWAP FEATURES (2) =====
+    vwap_daily: float                # Daily VWAP from NinjaTrader
+    dist_to_vwap: float             # (close - vwap) / tick_size
+    
+    # TOTAL: ~61 features
     
     def to_dict(self) -> Dict[str, float]:
         """Convert to dictionary for easier manipulation"""
