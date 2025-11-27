@@ -9,8 +9,8 @@ from layer2_feature_engine.core.data_loader import load_raw_bars
 from layer2_feature_engine.smc.smc_engine import SMCEngine
 from layer2_feature_engine.smc.config import GC_M1_SMC_CONFIG
 
-# Load data
-bars = load_raw_bars("/home/user/modeloutcome/data/raw/smc_export_gc_m1_v3.jsonl")[:300]
+# Load data - FULL DATASET
+bars = load_raw_bars("/home/user/modeloutcome/data/raw/smc_export_gc_m1_v3.jsonl")
 
 print("="*100)
 print("SMC 2-LAYER SWING DETECTION - DETAILED OUTPUT FOR NINJATRADER COMPARISON")
@@ -141,14 +141,14 @@ print(f"  - Highs: {len([s for s in ext_swings if s['type'] == 'HIGH'])}")
 print(f"  - Lows:  {len([s for s in ext_swings if s['type'] == 'LOW'])}")
 print()
 
-# Print first 50 bars with context
+# Print first 100 bars with context
 print("="*120)
-print("FIRST 50 BARS - OHLC CONTEXT")
+print("FIRST 100 BARS - OHLC CONTEXT")
 print("="*120)
 print(f"{'Bar':<5} {'Date & Time':<22} {'Open':<9} {'High':<9} {'Low':<9} {'Close':<9} {'Swing':<25}")
 print("-"*120)
 
-for i in range(min(50, len(bars))):
+for i in range(min(100, len(bars))):
     bar = bars[i]
 
     # Check if this bar has a swing
