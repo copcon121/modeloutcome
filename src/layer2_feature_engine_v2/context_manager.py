@@ -58,6 +58,10 @@ class SMCContextManager:
         self.fvg_detector = FVGDetector(config, tick_size)
         self.ob_detector = OBDetector(config, tick_size)
         
+        # Volume Profile Builder
+        from .volume_profile import VolumeProfileBuilder, GC_M1_VP_CONFIG
+        self.vp_builder = VolumeProfileBuilder(GC_M1_VP_CONFIG)
+        
         logger.info(f"SMCContextManager initialized with tick_size={tick_size}")
     
     def update(self, bar: RawBar) -> FeatureBar:
@@ -98,10 +102,13 @@ class SMCContextManager:
         # 5. OB Detection (uses EXTERNAL structure!)
         new_obs = self.ob_detector.update(bar, ext_struct)
         
-        # 6. Build FeatureBar
+        # 6. Volume Profile
+        vp_state = self.vp_builder.update(bar)
+        
+        # 7. Build FeatureBar
         feature_bar = self._build_feature_bar(
             bar, int_swing_state, ext_swing_state,
-            int_struct, ext_struct, pd_state
+            int_struct, ext_struct, pd_state, vp_state
         )
         
         return feature_bar
@@ -113,7 +120,8 @@ class SMCContextManager:
         ext_swing: ExternalSwingState,
         int_struct: dict,
         ext_struct: dict,
-        pd_state
+        pd_state,
+        vp_state
     ) -> FeatureBar:
         """
         Build FeatureBar from all detector states
@@ -214,16 +222,16 @@ class SMCContextManager:
             dist_to_nearest_fvg=nearest_fvg_dist,
             dist_to_nearest_ob=nearest_ob_dist,
             
-            # Volume Profile (placeholder)
-            vp_poc_price=0.0,
-            vp_val_price=0.0,
-            vp_vah_price=0.0,
-            vp_in_value_area=False,
-            vp_above_value_area=False,
-            vp_below_value_area=False,
-            vp_dist_to_poc=0.0,
-            vp_dist_to_vah=0.0,
-            vp_dist_to_val=0.0,
+            # Volume Profile (from VP builder)
+            vp_poc_price=vp_state.poc_price,
+            vp_val_price=vp_state.val_price,
+            vp_vah_price=vp_state.vah_price,
+            vp_in_value_area=vp_state.in_value_area,
+            vp_above_value_area=vp_state.above_value_area,
+            vp_below_value_area=vp_state.below_value_area,
+            vp_dist_to_poc=vp_state.dist_to_poc,
+            vp_dist_to_vah=vp_state.dist_to_vah,
+            vp_dist_to_val=vp_state.dist_to_val,
             
             # VWAP features
             vwap_daily=bar.vwap_daily,

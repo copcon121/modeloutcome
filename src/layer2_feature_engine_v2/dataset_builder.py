@@ -75,27 +75,34 @@ class DatasetBuilder:
                 try:
                     data = json.loads(line)
                     timestamp_str = data.get('timestamp', '')
-                    timestamp = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+                    timestamp = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'
+
+))
+                    
+                    # Extract from nested 'bar' object
+                    bar_data = data.get('bar', {})
+                    tick_data = data.get('tick_features', {})
                     
                     raw_bar = RawBar(
                         symbol=data.get('symbol', 'GC'),
                         timeframe=data.get('timeframe', 'M1'),
                         timestamp=timestamp,
                         bar_index=data.get('bar_index', i),
-                        o=data.get('open', 0.0),
-                        h=data.get('high', 0.0),
-                        l=data.get('low', 0.0),
-                        c=data.get('close', 0.0),
-                        volume=data.get('volume', 0.0),
-                        delta=data.get('delta', 0.0),
-                        buy_volume=data.get('buy_volume', 0.0),
-                        sell_volume=data.get('sell_volume', 0.0),
-                        best_bid=data.get('best_bid', data.get('close', 0.0)),
-                        best_ask=data.get('best_ask', data.get('close', 0.0)),
-                        tick_speed=data.get('tick_speed', 0.0),
-                        aggr_buy_speed=data.get('aggr_buy_speed', 0.0),
-                        aggr_sell_speed=data.get('aggr_sell_speed', 0.0),
-                        price_speed=data.get('price_speed', 0.0)
+                        o=bar_data.get('o', 0.0),
+                        h=bar_data.get('h', 0.0),
+                        l=bar_data.get('l', 0.0),
+                        c=bar_data.get('c', 0.0),
+                        volume=bar_data.get('volume', 0.0),
+                        delta=bar_data.get('delta', 0.0),
+                        buy_volume=bar_data.get('buy_volume', 0.0),
+                        sell_volume=bar_data.get('sell_volume', 0.0),
+                        best_bid=bar_data.get('best_bid', bar_data.get('c', 0.0)),
+                        best_ask=bar_data.get('best_ask', bar_data.get('c', 0.0)),
+                        tick_speed=tick_data.get('tick_speed', 0.0),
+                        aggr_buy_speed=tick_data.get('aggr_buy_speed', 0.0),
+                        aggr_sell_speed=tick_data.get('aggr_sell_speed', 0.0),
+                        price_speed=tick_data.get('price_speed', 0.0),
+                        vwap_daily=bar_data.get('vwap_daily', 0.0)
                     )
                     
                     raw_bars.append(raw_bar)
