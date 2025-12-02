@@ -1,4 +1,0 @@
-bar_index,timestamp,is_bullish,source_type,top,bottom
-249,2025-11-11 03:11:00,True,BOS_UP,4147,4144.9
-395,2025-11-11 05:37:00,False,CHOCH_DOWN,4138.2,4135.1
-554,2025-11-11 08:16:00,True,CHOCH_UP,4143.5,4142

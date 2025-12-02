@@ -34,19 +34,28 @@ ENV/
 .vscode/
 
 # Data files (exclude large data files from git)
-data/raw/*.csv
-data/raw/*.parquet
-data/processed/*.csv
-data/processed/*.parquet
-data/datasets/*.pt
-data/datasets/*.pkl
+data/raw/
+data/processed/
+data/processed_v2/
+data/processed_v2_test/
+data/labeled_outcome/
+data/labeled_v3/
+data/p2_masks/
+data/datasets/
+*.csv
+*.parquet
+*.pt
+*.pkl
 *.h5
 *.hdf5
+*.npy
+*.jsonl
 
 # Model weights
-models/*.pt
-models/*.pth
-models/*.ckpt
+models/
+*.pt
+*.pth
+*.ckpt
 
 # Logs
 logs/*.log
@@ -74,3 +83,22 @@ config/api_keys.yaml
 *.pdb
 bin/
 obj/
+
+output/
+
+*.log
+
+# Additional ignores
+__pycache__/
+.pytest_cache/
+.claude/
+modeloutcome_backup/
+notebooks/
+indicator/
+
+# Large output files
+output/
+backtests/*.json
+
+# Docs archive
+docs/archive/

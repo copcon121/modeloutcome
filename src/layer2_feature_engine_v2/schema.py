@@ -80,7 +80,8 @@ class InternalSwingState:
     """
     Internal swing state (wave 5) - window-based detection
     """
-    # Current leg direction: 0=BULLISH_LEG (from low), 1=BEARISH_LEG (from high), -1=undefined
+    # Current leg direction: 1=BULLISH_LEG (from low), 0=BEARISH_LEG (from high), -1=undefined
+    # Matches Pine Script LuxAlgo: BULLISH_LEG=1, BEARISH_LEG=0
     last_leg: int = -1
     
     # Last confirmed swings
@@ -302,12 +303,21 @@ class FeatureBar:
     in_bear_fvg: bool
     near_bull_fvg: bool
     near_bear_fvg: bool
-    in_bull_ob: bool
-    in_bear_ob: bool
-    near_bull_ob: bool
-    near_bear_ob: bool
+    # Internal OB zones
+    int_in_bull_ob: bool
+    int_in_bear_ob: bool
+    int_near_bull_ob: bool
+    int_near_bear_ob: bool
+    
+    # External OB zones
+    ext_in_bull_ob: bool
+    ext_in_bear_ob: bool
+    ext_near_bull_ob: bool
+    ext_near_bear_ob: bool
+    
     dist_to_nearest_fvg: float
     dist_to_nearest_ob: float
+    nearest_fvg_size: float
     
     # ===== 6. VOLUME PROFILE FEATURES (9) =====
     vp_poc_price: float
@@ -320,11 +330,55 @@ class FeatureBar:
     vp_dist_to_vah: float
     vp_dist_to_val: float
     
-    # ===== 7. VWAP FEATURES (2) =====
+    # ===== 7. WAVE STRENGTH FEATURES (v2) =====
+    impulse_strength: float          # 0-100
+    pullback_strength: float         # 0-100
+    cum_delta_5: float
+    cum_delta_10: float
+    cum_delta_20: float
+
+    # ===== 8. VWAP FEATURES (2) =====
     vwap_daily: float                # Daily VWAP from NinjaTrader
     dist_to_vwap: float             # (close - vwap) / tick_size
     
-    # TOTAL: ~61 features
+    # ===== 9. MACRO TREND CONTEXT (14 Features) =====
+    # M5 Context (7 features) - Immediate context for M1 trading
+    m5_trend_up: float              # 1.0 if Bullish, 0.0 otherwise
+    m5_trend_down: float            # 1.0 if Bearish, 0.0 otherwise
+    m5_premium: float               # 1.0 if > midpoint
+    m5_discount: float              # 1.0 if < midpoint
+    dist_to_m5_swing_high: float    # Normalized by ATR
+    dist_to_m5_swing_low: float
+    near_m5_fvg: float              # 1.0 if near/inside
+    
+    # H1 Context (7 features) - Medium-term trend
+    h1_trend_up: float
+    h1_trend_down: float
+    h1_premium: float
+    h1_discount: float
+    dist_to_h1_swing_high: float
+    dist_to_h1_swing_low: float
+    near_h1_fvg: float
+    
+    # ===== 10. ENHANCED MACRO CONTEXT (10 NEW Features) =====
+    # Derived from existing: trend_dir = trend_up - trend_down, pd_zone = premium - discount
+    # NEW features only (5 per TF):
+    
+    # M5 Enhanced (5 new features)
+    m5_swing_phase: float           # 0=range, 1=impulse, 2=pullback
+    m5_price_pos_in_range: float    # 0-1, position in rolling range
+    m5_bos_up_count_recent: float   # Count BOS up in recent X bars
+    m5_bos_down_count_recent: float # Count BOS down in recent X bars
+    m5_ob_imbalance: float          # n_buy_OB - n_sell_OB, clipped [-3,3]
+    
+    # H1 Enhanced (5 new features)
+    h1_swing_phase: float
+    h1_price_pos_in_range: float
+    h1_bos_up_count_recent: float
+    h1_bos_down_count_recent: float
+    h1_ob_imbalance: float
+    
+    # TOTAL: ~100 features (90 existing + 10 new)
     
     def to_dict(self) -> Dict[str, float]:
         """Convert to dictionary for easier manipulation"""
@@ -365,12 +419,27 @@ class FeatureBar:
             ext_bias_bullish=False,
             in_bull_fvg=False, in_bear_fvg=False,
             near_bull_fvg=False, near_bear_fvg=False,
-            in_bull_ob=False, in_bear_ob=False,
-            near_bull_ob=False, near_bear_ob=False,
+            int_in_bull_ob=False, int_in_bear_ob=False,
+            int_near_bull_ob=False, int_near_bear_ob=False,
+            ext_in_bull_ob=False, ext_in_bear_ob=False,
+            ext_near_bull_ob=False, ext_near_bear_ob=False,
             dist_to_nearest_fvg=0, dist_to_nearest_ob=0,
+            nearest_fvg_size=0.0,
             vp_poc_price=0, vp_val_price=0, vp_vah_price=0,
             vp_in_value_area=False, vp_above_value_area=False,
             vp_below_value_area=False,
-            vp_dist_to_poc=0, vp_dist_to_vah=0, vp_dist_to_val=0
+            vp_dist_to_poc=0, vp_dist_to_vah=0, vp_dist_to_val=0,
+            impulse_strength=0.0, pullback_strength=0.0,
+            cum_delta_5=0.0, cum_delta_10=0.0, cum_delta_20=0.0,
+            vwap_daily=0, dist_to_vwap=0,
+            m5_trend_up=0, m5_trend_down=0, m5_premium=0, m5_discount=0,
+            dist_to_m5_swing_high=0, dist_to_m5_swing_low=0, near_m5_fvg=0,
+            h1_trend_up=0, h1_trend_down=0, h1_premium=0, h1_discount=0,
+            dist_to_h1_swing_high=0, dist_to_h1_swing_low=0, near_h1_fvg=0,
+            # Enhanced macro features (10 new)
+            m5_swing_phase=0, m5_price_pos_in_range=0,
+            m5_bos_up_count_recent=0, m5_bos_down_count_recent=0, m5_ob_imbalance=0,
+            h1_swing_phase=0, h1_price_pos_in_range=0,
+            h1_bos_up_count_recent=0, h1_bos_down_count_recent=0, h1_ob_imbalance=0
         )
         return list(dummy.to_dict().keys())

@@ -41,6 +41,9 @@ class SMCConfig:
     # Auto threshold using ATR (matches FVGAutoThreshold)
     fvg_auto_threshold: bool = True
     fvg_threshold_multiplier: float = 2.0  # ATR multiplier
+    fvg_retest_ticks_into_zone: int = 1   # matches FVGRetestTicksIntoZone
+    fvg_extend_bars: int = 0              # matches FVGExtendBars (0 = live extend only)
+    fvg_max_bars: int = 300               # safety cap to drop very old gaps
     
     # ===== ORDER BLOCK SETTINGS =====
     # Lookback bars for finding OB source candle (matches OBLookbackBars)
@@ -48,7 +51,9 @@ class SMCConfig:
     
     # Buffer for OB zone (in ticks)
     ob_buffer_ticks: int = 1
-    
+    ob_full_fill_use_wicks: bool = True  # matches OBFullFillUseWicks
+    ob_max_internal: int = 0  # 0 = unlimited (matches MaxIntOBs)
+    ob_max_external: int = 0  # 0 = unlimited (matches MaxExtOBs)
     # Use full candle or body only (matches OBUseFullCandle)
     ob_use_full_candle: bool = True
     
@@ -59,9 +64,22 @@ class SMCConfig:
     # Value area percentage (70% of volume around POC)
     vp_value_area_pct: float = 0.70
     
+    # ===== ZONE LIFECYCLE =====
+    max_zone_age: int = 100 # Max bars a zone can remain active
+    
     # ===== LIQUIDITY SWEEP =====
     # Sweep confirmation: wick through + close back inside
     sweep_wick_buffer_ticks: int = 1
+    
+    # ===== HTF (Higher Timeframe) SETTINGS =====
+    # EMA period for HTF trend detection
+    htf_ema_period: int = 50  # Reduced for faster response
+    
+    # Swing lengths for HTF SMC
+    # M5: 20 bars = ~1.7 hours of data needed for first swing (immediate context)
+    # H1: 20 bars = 20 hours of data needed for first swing (medium trend)
+    htf_m5_swing_length: int = 20
+    htf_h1_swing_length: int = 20
 
 
 # ===== INSTRUMENT PROFILES =====

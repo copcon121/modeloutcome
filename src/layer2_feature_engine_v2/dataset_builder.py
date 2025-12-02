@@ -142,7 +142,8 @@ class DatasetBuilder:
         self,
         feature_bars: List[FeatureBar],
         window_size: int = 60,
-        stride: int = 1
+        stride: int = 1,
+        bar_indices: Optional[List[int]] = None,
     ) -> Tuple[np.ndarray, List[int]]:
         """
         Build sliding window sequences for ML
@@ -151,10 +152,15 @@ class DatasetBuilder:
             feature_bars: List of feature bars
             window_size: Sequence length (default 60 bars = 1 hour on M1)
             stride: Step size for sliding window
+            bar_indices: Optional list of original/global bar indices aligned
+                1:1 with feature_bars. If provided, returned indices reflect
+                the original bar positions instead of the local position in
+                feature_bars.
             
         Returns:
             sequences: Array of shape [N, window_size, num_features]
-            indices: List of ending bar indices for each sequence
+            indices: List of ending bar indices for each sequence. Uses
+                bar_indices if provided, otherwise local positions.
         """
         logger.info(f"Building sequences: window={window_size}, stride={stride}")
         
@@ -168,6 +174,13 @@ class DatasetBuilder:
         
         logger.info(f"Feature array shape: {feature_arrays.shape}")
         
+        # Validate bar_indices if provided
+        if bar_indices is not None and len(bar_indices) != num_bars:
+            raise ValueError(
+                f"bar_indices length {len(bar_indices)} does not match "
+                f"feature_bars length {num_bars}"
+            )
+        
         # Build sequences using sliding window
         sequences = []
         indices = []
@@ -175,7 +188,12 @@ class DatasetBuilder:
         for i in range(window_size - 1, num_bars, stride):
             sequence = feature_arrays[i - window_size + 1:i + 1]  # [window_size, num_features]
             sequences.append(sequence)
-            indices.append(i)
+            
+            # Use original bar index if provided, else local position
+            if bar_indices is not None:
+                indices.append(bar_indices[i])
+            else:
+                indices.append(i)
         
         sequences = np.array(sequences)  # [N, window_size, num_features]
         

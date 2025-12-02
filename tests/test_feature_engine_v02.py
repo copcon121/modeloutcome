@@ -19,7 +19,7 @@ def test_smc_and_vp_features():
     print("="*80 + "\n")
 
     # Load raw data
-    jsonl_path = "/home/user/modeloutcome/data/raw/smc_export_gc_m1_v3.jsonl"
+    jsonl_path = "data/raw/smc_export_gc_m1_v3_20250901.jsonl"
     print(f"Loading data from: {jsonl_path}")
 
     bars = load_raw_bars(jsonl_path)

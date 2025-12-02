@@ -26,7 +26,7 @@ def test_full_pipeline():
     print("="*80 + "\n")
 
     # ========== Configuration ==========
-    raw_jsonl_path = "/home/user/modeloutcome/data/raw/smc_export_gc_m1_v3.jsonl"
+    raw_jsonl_path = "data/raw/smc_export_gc_m1_v3_20250901.jsonl"
     context_len = 60
     stride = 1  # Every bar (production mode)
 

@@ -70,12 +70,13 @@ def run_python_detector(raw_data_jsonl: str, tick_size: float = 0.1):
         ext_state = ext_detector.update(bar)
         
         # Detect NEW swings
+        # LEG constants: BULLISH_LEG=1, BEARISH_LEG=0 (matches Pine Script)
         if int_state.swing_high_bar_index != prev_int_high_idx and int_state.swing_high_bar_index != -1:
             python_signals['INTERNAL_HIGH'].append({
                 'timestamp': bar.timestamp.isoformat(),
                 'bar_index': int_state.swing_high_bar_index,
                 'price': int_state.swing_high_price,
-                'leg': 'BEARISH_LEG' if int_state.last_leg == 1 else 'BULLISH_LEG'
+                'leg': 'BEARISH_LEG' if int_state.last_leg == 0 else 'BULLISH_LEG'
             })
             prev_int_high_idx = int_state.swing_high_bar_index
         
@@ -84,7 +85,7 @@ def run_python_detector(raw_data_jsonl: str, tick_size: float = 0.1):
                 'timestamp': bar.timestamp.isoformat(),
                 'bar_index': int_state.swing_low_bar_index,
                 'price': int_state.swing_low_price,
-                'leg': 'BEARISH_LEG' if int_state.last_leg == 1 else 'BULLISH_LEG'
+                'leg': 'BEARISH_LEG' if int_state.last_leg == 0 else 'BULLISH_LEG'
             })
             prev_int_low_idx = int_state.swing_low_bar_index
         
@@ -93,7 +94,7 @@ def run_python_detector(raw_data_jsonl: str, tick_size: float = 0.1):
                 'timestamp': bar.timestamp.isoformat(),
                 'bar_index': ext_state.swing_high_bar_index,
                 'price': ext_state.swing_high_price,
-                'leg': 'BEARISH_LEG' if ext_state.last_leg == 1 else 'BULLISH_LEG'
+                'leg': 'BEARISH_LEG' if ext_state.last_leg == 0 else 'BULLISH_LEG'
             })
             prev_ext_high_idx = ext_state.swing_high_bar_index
         
@@ -102,7 +103,7 @@ def run_python_detector(raw_data_jsonl: str, tick_size: float = 0.1):
                 'timestamp': bar.timestamp.isoformat(),
                 'bar_index': ext_state.swing_low_bar_index,
                 'price': ext_state.swing_low_price,
-                'leg': 'BEARISH_LEG' if ext_state.last_leg == 1 else 'BULLISH_LEG'
+                'leg': 'BEARISH_LEG' if ext_state.last_leg == 0 else 'BULLISH_LEG'
             })
             prev_ext_low_idx = ext_state.swing_low_bar_index
     

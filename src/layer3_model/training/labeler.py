@@ -15,12 +15,13 @@ import os
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from layer2_feature_engine.core.schema import RawBar, Record
-from layer2_feature_engine.core.context_manager import ContextManager
-from layer2_feature_engine.utils.config_loader import load_config
-from layer2_feature_engine.utils.logging_utils import setup_logger
-
-logger = setup_logger('labeler', log_file='logs/labeler.log')
+from layer2_feature_engine_v2.schema import RawBar, Record
+from layer2_feature_engine_v2.context_manager import ContextManager
+from layer2_feature_engine_v2.config import load_config
+# Simple logger setup
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('labeler')
 
 
 def load_historical_ohlc(filepath: str) -> pd.DataFrame:

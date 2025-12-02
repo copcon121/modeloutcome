@@ -69,15 +69,13 @@ class EventFilter:
         
         Args:
             feature_bars: List of feature bars
-            context: Optional context with averages
+            context: Optional context (not used with rolling average)
             
         Returns:
             List of EventFlags (one per bar)
         """
-        if context is None:
-            context = self._build_context(feature_bars)
-        
         flags_list = []
+        rolling_window = 100  # Use last 100 bars for average
         
         for i, fb in enumerate(feature_bars):
             # 1. Structure events
@@ -94,41 +92,59 @@ class EventFilter:
             )
             
             # 2. Zone events
-            # NEW FVG/OB: check if this bar created one
-            # NOTE: We'd need to track zone creation in detectors
-            # For now, use proxy: in_zone changed from previous bar
             has_new_fvg_ob = False  # TODO: implement zone creation tracking
             
-            in_zone = (fb.in_bull_fvg or fb.in_bear_fvg or
-                      fb.in_bull_ob or fb.in_bear_ob)
+            in_zone = (fb.in_bull_fvg or fb.in_bear_fvg or 
+                      fb.int_in_bull_ob or fb.int_in_bear_ob or
+                      fb.ext_in_bull_ob or fb.ext_in_bear_ob)
             
             near_zone = (fb.near_bull_fvg or fb.near_bear_fvg or
-                        fb.near_bull_ob or fb.near_bear_ob or
-                        fb.dist_to_nearest_fvg < 20 or  # Within 20 ticks
+                        fb.int_near_bull_ob or fb.int_near_bear_ob or
+                        fb.ext_near_bull_ob or fb.ext_near_bear_ob or
+                        fb.dist_to_nearest_fvg < 20 or
                         fb.dist_to_nearest_ob < 20)
             
-            # 3. Volatility events (STRICTER THRESHOLDS)
-            avg_range = context.get('avg_range', 2.0)
-            avg_volume = context.get('avg_volume', 100)
-            avg_delta = context.get('avg_delta', 20)
-            avg_tick_speed = context.get('avg_tick_speed', 500)
+            # 3. Volatility events (ROLLING AVERAGE - last 100 bars)
+            # Calculate rolling averages
+            start_idx = max(0, i - rolling_window)
+            window_bars = feature_bars[start_idx:i+1]
             
-            # Stricter thresholds to reduce P2 from 60% to 20-50%
-            high_range = fb.high_low_range > avg_range * 2.5  # Was 2.0
-            high_volume = fb.volume > avg_volume * 2.0  # Was 1.5
-            high_delta = abs(fb.delta_over_volume) > 0.65  # Was 0.5 (50% → 65%)
-            high_tick_speed = fb.tick_speed > avg_tick_speed * 2.0  # Was 1.5
+            if len(window_bars) > 10:  # Need minimum bars for average
+                avg_range = np.mean([b.high_low_range for b in window_bars])
+                avg_volume = np.mean([b.volume for b in window_bars if b.volume > 0])
+                avg_delta = np.mean([abs(b.delta) for b in window_bars])
+                avg_tick_speed = np.mean([b.tick_speed for b in window_bars if b.tick_speed > 0])
+            else:
+                # Fallback for first few bars
+                avg_range = 2.0
+                avg_volume = 100
+                avg_delta = 20
+                avg_tick_speed = 500
+            
+            # Moderate thresholds (adaptive to recent market conditions)
+            high_range = fb.high_low_range > avg_range * 1.3
+            high_volume = fb.volume > avg_volume * 2.0  # 2x recent average
+            
+            # Delta: Require BOTH high % AND significant absolute value
+            # Avoid tiny volume bars (11, 16) with high % but low impact
+            high_delta = (
+                abs(fb.delta_over_volume) > 0.60 and  # 60% imbalance
+                abs(fb.delta) > avg_delta * 1.5 and  # Absolute delta > 1.5x average
+                fb.volume > 50  # Minimum volume threshold
+            )
+            
+            high_tick_speed = fb.tick_speed > avg_tick_speed * 1.5
             
             # 4. Liquidity sweeps
             ls_event = fb.swept_prev_int_high or fb.swept_prev_int_low
             
-            # 5. VWAP interaction (STRICTER)
-            vwap_interaction = abs(fb.dist_to_vwap) < 3  # Was 5 ticks → now 3
+            # 5. VWAP interaction (VERY STRICT)
+            vwap_interaction = abs(fb.dist_to_vwap) < 2  # Was 3 ticks → now 2
             
-            # 6. VP interaction (STRICTER)
+            # 6. VP interaction (VERY STRICT)
             vp_interaction = (
                 fb.vp_in_value_area or
-                abs(fb.vp_dist_to_poc) < 5 or  # Was 10 ticks → now 5
+                abs(fb.vp_dist_to_poc) < 3 or  # Was 5 ticks → now 3
                 fb.vp_above_value_area != (i > 0 and flags_list[i-1].vp_interaction)
             ) if fb.vp_poc_price > 0 else False
             
@@ -179,15 +195,17 @@ class EventFilter:
     def apply_phase2_filter(self, flags_list: List[EventFlags]) -> List[bool]:
         """
         Phase 2: MODERATE - Balanced (RECOMMENDED)
-        Keep: P1 OR (structure + high volatility + zone interaction)
+        Keep: P1 OR structure OR high_volatility OR (zone+volatility) OR liquidity_sweep
+        
+        Key change: Zone alone → P3 (must have volatility for P2)
         """
         mask_p1 = self.apply_phase1_filter(flags_list)
         
         return [
             mask_p1[i] or (
-                f.has_bos_choch or  # Any structure
-                f.high_volatility or  # High volatility
-                f.in_zone or  # In zone
+                f.has_bos_choch or  # Structure event
+                f.high_volatility or  # High volatility alone OK
+                (f.in_zone and f.high_volatility) or  # Zone + volatility
                 f.ls_event  # Liquidity sweep
             )
             for i, f in enumerate(flags_list)
