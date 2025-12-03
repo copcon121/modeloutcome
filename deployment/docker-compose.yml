@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  live-gateway:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    container_name: live-gateway
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../logs:/app/logs
+      - ../output/asm_models_v1:/app/output/asm_models_v1:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Optional: Prometheus metrics (uncomment if needed)
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: prometheus
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #   depends_on:
+  #     - live-gateway
+
+networks:
+  default:
+    name: trading-network

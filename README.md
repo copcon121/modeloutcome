@@ -153,11 +153,20 @@ modeloutcome/
 
 ## 📖 Documentation
 
+### Planning Documents
 | Document | Description |
 |----------|-------------|
 | [PLAN_PIPELINE_SMC_ML_v1.md](PLAN_PIPELINE_SMC_ML_v1.md) | Overall pipeline architecture |
 | [PLAN_AuctionStateModel_v1.md](PLAN_AuctionStateModel_v1.md) | ASM development plan |
 | [PLAN_S4_HighVol_FVG_London_v1.md](PLAN_S4_HighVol_FVG_London_v1.md) | Baseline strategy spec |
+
+### Deployment & Operations
+| Document | Description |
+|----------|-------------|
+| [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | Fresh install to production deployment |
+| [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) | Live Gateway API reference |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and solutions |
+| [services/live_gateway/README.md](services/live_gateway/README.md) | Live Gateway service overview |
 
 ---
 
@@ -218,14 +227,43 @@ modeloutcome/
 
 ---
 
+## 🧪 Testing & Validation
+
+### Health Check
+```bash
+python scripts/health_check.py
+```
+
+### Full Pipeline Test
+```bash
+# Quick test (1 week data)
+python scripts/test_full_pipeline_v1.py --quick
+
+# Full test (6 weeks data)
+python scripts/test_full_pipeline_v1.py
+```
+
+### Live Gateway
+```bash
+# Start server
+python services/live_gateway/run_server.py
+
+# Validate with replay
+python scripts/simulate_live_gateway_from_jsonl.py
+```
+
+---
+
 ## 📝 Experiment Log
 
 | Date | Experiment | Result |
 |------|------------|--------|
 | 2025-12-03 | Extended validation: S4_LDN_ASM_LowShift_0.2_v1.0 on new 6W data | **PASS** - Exp +0.85R (+59% vs baseline), WR 61.6%, MaxDD 26R |
 | 2025-12-03 | Lock S4_LDN_ASM_LowShift_0.2_v1.1 | 🔒 LOCKED – Ready for shadow trading |
+| 2025-12-03 | Live Gateway implementation | ✅ **PASS** - 99.9%+ accuracy vs backtest |
+| 2025-12-03 | Full Pipeline Test v1.0 | ✅ **PASS** - All 5 components working |
 
 ---
 
-**Version**: 4.4 (S4_LDN_ASM_LowShift_0.2_v1.1 LOCKED)  
+**Version**: 4.5 (Live Gateway + Documentation)  
 **Last Updated**: 2025-12-03

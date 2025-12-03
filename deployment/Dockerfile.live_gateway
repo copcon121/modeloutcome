@@ -1,0 +1,45 @@
+# Dockerfile for Live Gateway Service
+# S4_LDN_ASM_LowShift_0.2_v1.1
+
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first (for caching)
+COPY services/live_gateway/requirements.txt ./requirements_gateway.txt
+COPY requirements.txt ./requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements_gateway.txt
+
+# Copy project files
+COPY src/ ./src/
+COPY services/ ./services/
+COPY config/ ./config/
+
+# Create directories
+RUN mkdir -p /app/logs /app/output/asm_models_v1
+
+# Note: ASM model should be mounted as volume
+# COPY output/asm_models_v1/ASM-GRU64-v1.0-C3.pt ./output/asm_models_v1/
+
+# Expose port
+EXPOSE 8000
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Run Live Gateway
+CMD ["uvicorn", "services.live_gateway.app:app", "--host", "0.0.0.0", "--port", "8000"]

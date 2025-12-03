@@ -1,0 +1,73 @@
+{
+  "test_id": "pipeline_test_20251203_101545",
+  "timestamp": "2025-12-03T10:15:49.892945",
+  "mode": "quick",
+  "overall_status": "PASS",
+  "total_duration": 4.333808183670044,
+  "components": [
+    {
+      "name": "Feature Generation",
+      "status": "PASS",
+      "duration": 2.28647518157959,
+      "metrics": {
+        "bars_processed": 1000,
+        "features_generated": 1000,
+        "feature_count": 96
+      },
+      "error": null,
+      "details": null
+    },
+    {
+      "name": "ASM Model",
+      "status": "PASS",
+      "duration": 2.02756404876709,
+      "metrics": {
+        "model_loaded": true,
+        "prob_sum": 1.0
+      },
+      "error": null,
+      "details": null
+    },
+    {
+      "name": "S4 Rule Engine",
+      "status": "PASS",
+      "duration": 0.0019054412841796875,
+      "metrics": {
+        "london_hours": 6
+      },
+      "error": null,
+      "details": null
+    },
+    {
+      "name": "Live Gateway",
+      "status": "PASS",
+      "duration": 0.01416921615600586,
+      "metrics": {
+        "context_store": "OK",
+        "model_loaded": true
+      },
+      "error": null,
+      "details": null
+    },
+    {
+      "name": "Integration",
+      "status": "PASS",
+      "duration": 0.00140380859375,
+      "metrics": {
+        "data_files": 1,
+        "model_exists": true
+      },
+      "error": null,
+      "details": null
+    }
+  ],
+  "summary": {
+    "components_tested": 5,
+    "components_passed": 5,
+    "components_failed": 0,
+    "success_rate": 100.0
+  },
+  "recommendations": [
+    "\u2705 All components PASS - pipeline ready for production"
+  ]
+}
