@@ -42,6 +42,8 @@ P_SHIFT_THRESHOLD = 0.2  # ASM LowShift filter threshold
 # Logging
 LOG_DIR = ROOT / "logs"
 LOG_FILE = LOG_DIR / "live_signals_s4_asm_v1.jsonl"
+DEBUG_LOG_FILE = LOG_DIR / "live_debug.jsonl"
+DEBUG_MODE = True  # Enable debug logging
 
 
 # ==============================================================================
@@ -189,6 +191,28 @@ async def process_live_bar(event: LiveBarEvent):
                     response.tp = s4_setup.tp_price
                     response.rr = S4_CONFIG["rr_target"]
         
+        # DEBUG: Log every bar for debugging
+        if DEBUG_MODE:
+            debug_entry = {
+                "timestamp": event.timestamp.isoformat(),
+                "symbol": event.symbol,
+                "bar_index": event.bar_index,
+                "hour": hour,
+                "session": s4_setup.session,
+                "is_london": s4_setup.session == "London",
+                "high_vol": bool(is_high_vol),
+                "in_fvg": bool(s4_setup.in_fvg) if s4_setup.in_fvg is not None else False,
+                "ext_trend": int(s4_setup.ext_trend) if hasattr(s4_setup, 'ext_trend') and s4_setup.ext_trend is not None else 0,
+                "s4_valid": bool(s4_setup.is_valid),
+                "bar_data": {
+                    "o": float(event.bar.o), "h": float(event.bar.h), "l": float(event.bar.l), "c": float(event.bar.c),
+                    "volume": float(event.bar.volume), "delta": float(event.bar.delta),
+                },
+                "feature_count": len(feature_dict) if feature_dict else 0,
+            }
+            with open(DEBUG_LOG_FILE, "a") as f:
+                f.write(json.dumps(debug_entry) + "\n")
+        
         # 7. Log signal (always log when S4 setup is valid)
         if s4_setup.is_valid:
             log_entry = {
@@ -202,8 +226,8 @@ async def process_live_bar(event: LiveBarEvent):
                 "entry": s4_setup.entry_price,
                 "sl": s4_setup.sl_price,
                 "tp": s4_setup.tp_price,
-                "high_vol": is_high_vol,
-                "in_fvg": s4_setup.in_fvg,
+                "high_vol": bool(is_high_vol),
+                "in_fvg": bool(s4_setup.in_fvg) if s4_setup.in_fvg is not None else False,
                 "ext_trend": s4_setup.ext_trend,
                 "p_up": asm_probs["p_up"] if asm_probs else None,
                 "p_down": asm_probs["p_down"] if asm_probs else None,
@@ -219,6 +243,9 @@ async def process_live_bar(event: LiveBarEvent):
         return response
         
     except Exception as e:
+        import traceback
+        error_detail = f"{str(e)}\n{traceback.format_exc()}"
+        print(f"ERROR processing bar: {error_detail}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -232,6 +259,58 @@ async def get_stats():
         "p_shift_threshold": P_SHIFT_THRESHOLD,
         "session_filter": S4_CONFIG["session"],
         "rr_target": S4_CONFIG["rr_target"],
+    }
+
+
+@app.get("/debug/features/{symbol}")
+async def get_debug_features(symbol: str, timeframe: str = "M1"):
+    """Get current feature values for debugging"""
+    import numpy as np
+    
+    key = (symbol, timeframe)
+    if key not in context_store.contexts:
+        return {"error": f"No context for {symbol}/{timeframe}"}
+    
+    ctx = context_store.contexts[key]
+    
+    # Get latest feature dict
+    feature_dict = ctx.get("last_feature_dict", {})
+    
+    # Count NaN values
+    nan_count = 0
+    nan_features = []
+    for k, v in feature_dict.items():
+        if v is None or (isinstance(v, float) and np.isnan(v)):
+            nan_count += 1
+            nan_features.append(k)
+    
+    # Get ASM context and check for NaN
+    asm_context = context_store.get_asm_context(symbol, timeframe)
+    asm_nan_count = 0
+    if asm_context is not None:
+        asm_nan_count = int(np.isnan(asm_context).sum())
+    
+    # Sample some key features
+    key_features = {
+        "in_bull_fvg": feature_dict.get("in_bull_fvg"),
+        "in_bear_fvg": feature_dict.get("in_bear_fvg"),
+        "ext_trend_dir": feature_dict.get("ext_trend_dir"),
+        "high_low_range": feature_dict.get("high_low_range"),
+        "va_high": feature_dict.get("va_high"),
+        "va_low": feature_dict.get("va_low"),
+        "close": feature_dict.get("close"),
+    }
+    
+    return {
+        "symbol": symbol,
+        "timeframe": timeframe,
+        "total_features": len(feature_dict),
+        "nan_count": nan_count,
+        "nan_features": nan_features[:20],  # First 20 NaN features
+        "asm_context_shape": asm_context.shape if asm_context is not None else None,
+        "asm_nan_count": asm_nan_count,
+        "key_features": key_features,
+        "bars_in_context": len(ctx.get("bars", [])),
     }
 
 

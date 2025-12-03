@@ -8,6 +8,13 @@ Usage:
 """
 
 import argparse
+import sys
+from pathlib import Path
+
+# Add project root to path
+ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(ROOT))
+
 import uvicorn
 
 
@@ -20,11 +27,13 @@ def main():
     
     print(f"Starting Live Gateway on {args.host}:{args.port}")
     
+    # Import app directly to avoid module path issues
+    from services.live_gateway.app import app
+    
     uvicorn.run(
-        "services.live_gateway.app:app",
+        app,
         host=args.host,
         port=args.port,
-        reload=args.reload,
     )
 
 
