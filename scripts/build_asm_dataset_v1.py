@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-ASM Dataset Builder v1
-======================
+ASM Dataset Builder v1.x
+========================
 Build Auction State Model dataset with VA-shift labels.
+v1.x: Added Weekly VA features and Daily-Weekly VA relationship.
 
 Reference: PLAN_AuctionStateModel_v1.md
 
@@ -18,6 +19,7 @@ Usage:
 import os
 import json
 import glob
+import math
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
@@ -69,9 +71,127 @@ LABEL_NAMES = {0: "UP", 1: "DOWN", 2: "NEUTRAL"}
 # We'll dynamically detect numeric columns
 EXCLUDE_COLS = ["timestamp", "bar_index"]
 
+# Weekly VA feature names (will be added dynamically)
+WEEKLY_VA_FEATURES = [
+    "weekly_vah",
+    "weekly_val", 
+    "weekly_va_center",
+    "in_weekly_va",
+    "dist_to_weekly_vah",
+    "dist_to_weekly_val",
+    # Daily-Weekly relationship
+    "daily_va_center_minus_weekly_va_center",
+    "daily_vah_minus_weekly_vah",
+    "daily_val_minus_weekly_val",
+    "daily_va_above_weekly",
+    "daily_va_below_weekly",
+    "daily_va_inside_weekly",
+]
+
 # ==============================================================================
 # HELPER FUNCTIONS
 # ==============================================================================
+
+def compute_weekly_va(df: pd.DataFrame, tick_size: float = 0.1, value_area_pct: float = 0.7) -> pd.DataFrame:
+    """
+    Compute Weekly VA features for each bar.
+    
+    Args:
+        df: DataFrame with timestamp, close, high, low, volume, and daily VA columns
+        tick_size: Price tick size for histogram bins
+        value_area_pct: Value area percentage (default 70%)
+    
+    Returns:
+        DataFrame with weekly VA columns added
+    """
+    print("Computing Weekly VA features...")
+    
+    # Get week ID for each bar (ISO week)
+    df["_week_id"] = df["timestamp"].apply(lambda ts: f"{ts.isocalendar()[0]}-W{ts.isocalendar()[1]:02d}")
+    
+    # Group by week and compute VA
+    weekly_va_data = {}
+    
+    for week_id, week_df in df.groupby("_week_id"):
+        # Build histogram from all bars in week
+        hist = {}
+        for _, row in week_df.iterrows():
+            low, high, vol = row["low"], row["high"], row["volume"]
+            if high <= low or vol <= 0:
+                continue
+            n_bins = max(1, int(round((high - low) / tick_size)) + 1)
+            vol_per_bin = vol / n_bins
+            price = math.floor(low / tick_size) * tick_size
+            while price <= high:
+                hist[price] = hist.get(price, 0.0) + vol_per_bin
+                price += tick_size
+        
+        if not hist:
+            weekly_va_data[week_id] = {"vah": 0.0, "val": 0.0, "poc": 0.0}
+            continue
+        
+        # POC
+        poc = max(hist.items(), key=lambda kv: kv[1])[0]
+        
+        # Value Area
+        total_vol = sum(hist.values())
+        target_vol = total_vol * value_area_pct
+        prices = sorted(hist.keys())
+        poc_idx = prices.index(poc)
+        
+        included = {poc}
+        cumulative_vol = hist[poc]
+        left, right = poc_idx - 1, poc_idx + 1
+        
+        while cumulative_vol < target_vol and (left >= 0 or right < len(prices)):
+            left_vol = hist.get(prices[left], 0.0) if left >= 0 else 0.0
+            right_vol = hist.get(prices[right], 0.0) if right < len(prices) else 0.0
+            
+            if left >= 0 and (right >= len(prices) or left_vol >= right_vol):
+                included.add(prices[left])
+                cumulative_vol += left_vol
+                left -= 1
+            elif right < len(prices):
+                included.add(prices[right])
+                cumulative_vol += right_vol
+                right += 1
+            else:
+                break
+        
+        val = min(included)
+        vah = max(included)
+        weekly_va_data[week_id] = {"vah": vah, "val": val, "poc": poc}
+    
+    # Map weekly VA to each bar
+    df["weekly_vah"] = df["_week_id"].map(lambda w: weekly_va_data.get(w, {}).get("vah", 0.0))
+    df["weekly_val"] = df["_week_id"].map(lambda w: weekly_va_data.get(w, {}).get("val", 0.0))
+    df["weekly_va_center"] = (df["weekly_vah"] + df["weekly_val"]) / 2
+    
+    # Price vs Weekly VA
+    df["in_weekly_va"] = ((df["close"] >= df["weekly_val"]) & (df["close"] <= df["weekly_vah"])).astype(float)
+    df["dist_to_weekly_vah"] = (df["close"] - df["weekly_vah"]) / tick_size
+    df["dist_to_weekly_val"] = (df["close"] - df["weekly_val"]) / tick_size
+    
+    # Daily VA vs Weekly VA relationship
+    daily_va_center = (df[VA_COLS["vah"]] + df[VA_COLS["val"]]) / 2
+    df["daily_va_center_minus_weekly_va_center"] = daily_va_center - df["weekly_va_center"]
+    df["daily_vah_minus_weekly_vah"] = df[VA_COLS["vah"]] - df["weekly_vah"]
+    df["daily_val_minus_weekly_val"] = df[VA_COLS["val"]] - df["weekly_val"]
+    
+    # Position flags
+    df["daily_va_above_weekly"] = (df[VA_COLS["val"]] > df["weekly_vah"]).astype(float)
+    df["daily_va_below_weekly"] = (df[VA_COLS["vah"]] < df["weekly_val"]).astype(float)
+    df["daily_va_inside_weekly"] = (
+        (df[VA_COLS["vah"]] <= df["weekly_vah"]) & 
+        (df[VA_COLS["val"]] >= df["weekly_val"])
+    ).astype(float)
+    
+    # Cleanup
+    df.drop(columns=["_week_id"], inplace=True)
+    
+    print(f"  Added {len(WEEKLY_VA_FEATURES)} Weekly VA features")
+    return df
+
 
 def load_all_data(data_paths: List[str]) -> pd.DataFrame:
     """Load and concatenate all CSV files, sorted by timestamp."""
@@ -487,7 +607,7 @@ def sanity_check(
 
 def main():
     print("="*60)
-    print("ASM Dataset Builder v1")
+    print("ASM Dataset Builder v1.x (with Weekly VA)")
     print("="*60)
     print(f"Parameters:")
     print(f"  K (lookahead):          {K}")
@@ -508,9 +628,13 @@ def main():
         print("Please ensure feature engine exports: vp_vah_price, vp_val_price, vp_poc_price")
         return
     
-    # Get feature columns
+    # Compute Weekly VA features (ASM v1.x upgrade)
+    df = compute_weekly_va(df, tick_size=0.1, value_area_pct=0.7)
+    
+    # Get feature columns (now includes Weekly VA)
     feature_cols = get_feature_columns(df)
-    print(f"\nUsing {len(feature_cols)} feature columns")
+    old_count = 100  # Previous feature count
+    print(f"\nASM features dim: D={len(feature_cols)} (was {old_count} before Weekly VA upgrade)")
     
     # Build dataset
     print("\nBuilding dataset...")

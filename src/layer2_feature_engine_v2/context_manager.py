@@ -165,9 +165,12 @@ class SMCContextManager:
         self.htf_m5_swing_length = getattr(config, 'htf_m5_swing_length', 20)
         self.htf_h1_swing_length = getattr(config, 'htf_h1_swing_length', 20)
         
-        # Volume Profile
-        from .volume_profile import VolumeProfileBuilder, GC_M1_VP_DAILY
+        # Volume Profile (Daily)
+        from .volume_profile import VolumeProfileBuilder, WeeklyVolumeProfileBuilder, GC_M1_VP_DAILY
         self.vp_builder = VolumeProfileBuilder(GC_M1_VP_DAILY)
+        
+        # Volume Profile (Weekly) - for ASM v1.x
+        self.weekly_vp_builder = WeeklyVolumeProfileBuilder(GC_M1_VP_DAILY)
         
         # Wave Strength
         from .wave_analyzer import WaveAnalyzer
@@ -206,8 +209,11 @@ class SMCContextManager:
             bar_index=bar.bar_index
         )
         
-        # 2. Update Volume Profile
+        # 2. Update Volume Profile (Daily)
         vp_state = self.vp_builder.update(bar)
+        
+        # 2b. Update Weekly Volume Profile
+        weekly_vp = self.weekly_vp_builder.update(bar)
         
         # 3. Update Wave Strength
         wave_features = self.wave_analyzer.update(bar, smc_state, len(self.smc.fvgs))
@@ -232,10 +238,10 @@ class SMCContextManager:
             )
             
         # 5. Build Feature Bar
-        fb = self._build_feature_bar(bar, smc_state, vp_state, wave_features)
+        fb = self._build_feature_bar(bar, smc_state, vp_state, wave_features, weekly_vp)
         return fb
 
-    def _build_feature_bar(self, bar: RawBar, state, vp, wave) -> FeatureBar:
+    def _build_feature_bar(self, bar: RawBar, state, vp, wave, weekly_vp: dict) -> FeatureBar:
         
         # Helper for HTF Features
         def get_htf_features(smc: LuxSMC, resampler: HTFResampler, prefix: str):

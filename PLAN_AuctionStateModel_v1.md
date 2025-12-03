@@ -2,7 +2,21 @@
 
 **Created**: 2025-12-02  
 **Status**: Active Development  
-**Version**: v1.0
+**Version**: v1.x (with Weekly VA features)
+
+---
+
+## Baseline Model: ASM-GRU64-v1.0-C3
+
+| Metric | Value |
+|--------|-------|
+| AUC_SHIFT | **0.712** |
+| AUC_UP | **0.779** |
+| AUC_DOWN | **0.857** |
+| Macro F1 | 0.149 |
+| Config | Focal Loss (γ=2.0) + inv class weights + oversample_shift (α=5.0) |
+| Features | 112 (100 base + 12 Weekly VA) |
+| Model | `output/asm_models_v1/ASM-GRU64-v1.0-C3.pt` |
 
 ---
 
@@ -132,8 +146,10 @@ else:
 
 | Group | Features | Description |
 |-------|----------|-------------|
-| **VA Position** | in_va, above_va, below_va, dist_to_vah, dist_to_val, dist_to_poc | Price position relative to VA |
-| **VA Structure** | vah_price, val_price, poc_price, va_width, va_center | Current VA parameters |
+| **Daily VA Position** | in_va, above_va, below_va, dist_to_vah, dist_to_val, dist_to_poc | Price position relative to Daily VA |
+| **Daily VA Structure** | vah_price, val_price, poc_price, va_width, va_center | Current Daily VA parameters |
+| **Weekly VA (v1.x)** | weekly_vah, weekly_val, weekly_va_center, in_weekly_va, dist_to_weekly_vah/val | Weekly VA parameters |
+| **Daily-Weekly Relation (v1.x)** | daily_va_center_minus_weekly_va_center, daily_vah_minus_weekly_vah, daily_val_minus_weekly_val, daily_va_above/below/inside_weekly | Daily VA drift relative to Weekly VA |
 | **SMC Structure** | ext_bos_up/down, ext_choch_up/down, int_bos_up/down, int_choch_up/down | Structure breaks |
 | **Swing** | dist_to_swing_high, dist_to_swing_low, swing_high_price, swing_low_price | Swing levels |
 | **Volume/Delta** | volume, delta, cum_delta_5/10/20, delta_over_volume | Orderflow |
@@ -142,10 +158,12 @@ else:
 | **Zones** | in_bull_fvg, in_bear_fvg, in_bull_ob, in_bear_ob, dist_to_nearest_fvg | Zone proximity |
 | **Candle** | close, high_low_range, body, upper_wick, lower_wick | Price action |
 
+**Note (v1.x)**: Daily VA drift ra khỏi Weekly VA được encode bằng các feature `daily_va_center_minus_weekly_va_center`, `daily_va_above_weekly`, `daily_va_below_weekly`, `daily_va_inside_weekly`. Điều này giúp model nhận biết khi Daily VA đang expand/contract so với Weekly context.
+
 ### 3.2 Context Window
 
 - **Sequence length**: 60 bars (configurable)
-- **Features per bar**: ~70-100 (from existing feature engine)
+- **Features per bar**: 112 (v1.x with Weekly VA, was 100 in v1.0)
 
 ---
 

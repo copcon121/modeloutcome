@@ -111,9 +111,13 @@ Auto-trade futures (GC, ES, NQ) using:
 - Price/Candle: OHLC, spread, body, wicks
 - Volume/Delta: vol, delta, cum_delta, delta_z
 - SMC Structure: BOS/CHoCH, sweep, zone flags
-- VA/VP: VAH, VAL, POC, in_va, dist_to_va
+- Daily VA/VP: VAH, VAL, POC, in_va, dist_to_va
+- Weekly VA (v1.x): weekly_vah, weekly_val, weekly_va_center, in_weekly_va
+- Daily-Weekly Relation (v1.x): daily_va_center_minus_weekly_va_center, daily_va_above/below/inside_weekly
 - Wave: impulse_strength, pullback_strength
 - Regime: vol_regime, session
+
+**Note (v1.x)**: ASM now uses 112 features including Weekly VA and Daily-Weekly relationship features.
 
 ---
 
@@ -138,6 +142,42 @@ Auto-trade futures (GC, ES, NQ) using:
 - MaxDD: 15.1R
 
 **Reference**: [PLAN_S4_HighVol_FVG_London_v1.md](PLAN_S4_HighVol_FVG_London_v1.md)
+
+---
+
+### 2.3.1 🔒 Strategy Module: S4_LDN_ASM_LowShift_0.2_v1.1
+
+**Trend continuation (HighVol FVG London) + AuctionStateModel v1.0 low-shift filter.**
+
+```
+SIGNAL FLOW:
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  SMC Core (M1/M5/H1 + VA)                                              │
+│       │                                                                 │
+│       ▼                                                                 │
+│  S4 Rule Engine (HighVol + FVG + London)                               │
+│       │                                                                 │
+│       ▼                                                                 │
+│  ASM v1.0 (GRU64, p_shift = p_up + p_down)                             │
+│       │                                                                 │
+│       ▼                                                                 │
+│  Filter: p_shift ≤ 0.2 ?                                               │
+│       │                                                                 │
+│       ├── YES → Signal → NT-AUTOBOT → Execute                          │
+│       └── NO  → Skip trade                                             │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Performance Summary**:
+
+| Dataset | Baseline Exp | + LowShift 0.2 | Improvement |
+|---------|--------------|----------------|-------------|
+| OLD (Oct-Nov 2024) | +0.54R | +1.48R | +174% |
+| NEW 6W (Apr-Jun 2025) | +0.53R | +0.85R | +59% |
+
+**Status**: 🔒 LOCKED – PASS extended validation, ready for shadow trading
 
 ---
 
@@ -230,6 +270,13 @@ Ninja → API Request (context + candidate entry)
 - [ ] TẦNG 3: ASM v1 Dataset (build_asm_dataset_v1.py)
 - [ ] TẦNG 3: ASM v1 Training (train_asm_v1.py)
 
+### Parallel Track 🔀
+- [ ] **Regime Model v1** (Trend vs Range, SMC core + VA/VP + Volatility)
+  - Phân loại: `trend_up`, `trend_down`, `range`
+  - Dùng để bật/tắt chiến lược theo regime
+  - Cung cấp feature macro cho ASM / Pattern models
+  - See [PLAN_RegimeModel_v1.md](PLAN_RegimeModel_v1.md)
+
 ### Next Steps 📋
 1. **ASM Dataset v1** - Build VA-shift labels
 2. **ASM Training v1** - 3-class classifier
@@ -289,12 +336,70 @@ modeloutcome/
 
 ---
 
-## 7. References
+## 7. NT-AUTOBOT Shadow Plan for S4_LDN_ASM_LowShift_0.2_v1.1
 
-- [PLAN_AuctionStateModel_v1.md](PLAN_AuctionStateModel_v1.md) - ASM development
-- [PLAN_S4_HighVol_FVG_London_v1.md](PLAN_S4_HighVol_FVG_London_v1.md) - Baseline strategy
-- [PLAN_P4_outcome_v2.md](PLAN_P4_outcome_v2.md) - Archive & lessons learned
+### 7.1 Shadow Mode Overview
+
+**Mục tiêu**: Validate strategy trong điều kiện live market trước khi deploy thật.
+
+```
+SHADOW MODE:
+├── NinjaTrader chỉ LOG lệnh, KHÔNG đặt real order
+├── Ghi lại tất cả signal details vào file/DB
+├── So sánh với actual market outcome
+└── Thời gian target: 4-8 weeks
+```
+
+### 7.2 Data Logging Schema
+
+Mỗi signal sẽ log các fields sau:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| signal_id | uuid | Unique identifier |
+| timestamp | datetime | Signal generation time |
+| symbol | string | "GC" |
+| side | string | "long" / "short" |
+| entry_price | float | Entry price |
+| sl_price | float | Stop loss price |
+| tp_price | float | Take profit price |
+| p_up | float | ASM p_up |
+| p_down | float | ASM p_down |
+| p_neutral | float | ASM p_neutral |
+| p_shift | float | p_up + p_down |
+| filter_pass | bool | p_shift <= 0.2 |
+| outcome_rr | float | Actual outcome (filled after trade closes) |
+| outcome | string | "win" / "loss" / "timeout" |
+| version | string | "S4_LDN_ASM_LowShift_0.2_v1.1" |
+
+### 7.3 Success Criteria (Shadow)
+
+| Metric | Target | Baseline |
+|--------|--------|----------|
+| Expectancy | > +0.60R | +0.53R (baseline) |
+| Winrate | > 55% | 50.8% (baseline) |
+| MaxDD | < 30R | 37R (baseline) |
+| Trades/Week | 30-50 | - |
+
+### 7.4 Timeline
+
+| Phase | Duration | Action |
+|-------|----------|--------|
+| Week 1-2 | 2 weeks | Shadow logging, monitor data quality |
+| Week 3-4 | 2 weeks | Analyze results, compare with backtest |
+| Week 5-8 | 4 weeks | Extended shadow, confirm edge stability |
+| Post-shadow | - | Decision: Deploy live or iterate |
 
 ---
 
-**Last Updated**: 2025-12-02
+## 8. References
+
+- [PLAN_AuctionStateModel_v1.md](PLAN_AuctionStateModel_v1.md) - ASM development
+- [PLAN_RegimeModel_v1.md](PLAN_RegimeModel_v1.md) - Regime detection (Trend vs Range)
+- [PLAN_S4_HighVol_FVG_London_v1.md](PLAN_S4_HighVol_FVG_London_v1.md) - Baseline strategy + Locked strategy
+- [PLAN_P4_outcome_v2.md](PLAN_P4_outcome_v2.md) - Archive & lessons learned
+- `backtests/s4_asm_lowshift_extval_new6w_v1.json` - Extended validation results
+
+---
+
+**Last Updated**: 2025-12-03

@@ -11,7 +11,8 @@
 | Component | Status | Description |
 |-----------|--------|-------------|
 | **S4_HighVol_FVG_London_v1** | ✅ LOCKED | Baseline strategy (rule-only, no ML) |
-| **Auction State Model (ASM) v1** | 🔄 IN PROGRESS | ML critic/filter for VA-shift evaluation |
+| **S4_LDN_ASM_LowShift_0.2_v1.1** | 🔒 LOCKED | S4 + ASM inverse filter (p_shift ≤ 0.2) – PASS extended validation |
+| **Auction State Model (ASM) v1** | ✅ TRAINED | ML critic/filter for VA-shift evaluation |
 
 ### Key Philosophy
 
@@ -25,14 +26,12 @@
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Baseline Performance (S4_London, 6W backtest)
+### Performance Summary (6W backtest, Apr-Jun 2025)
 
-| Metric | Value |
-|--------|-------|
-| Trades | 297 |
-| Winrate | 55.2% |
-| Expectancy | +0.654R |
-| MaxDD | 15.1R |
+| Strategy | Trades | WR% | Exp(R) | MaxDD |
+|----------|--------|-----|--------|-------|
+| **S4_London (Baseline)** | 479 | 50.9% | +0.54R | 37R |
+| **S4_LDN_ASM_LowShift_0.2** | 109 | **82.6%** | **+1.48R** | **9R** |
 
 ---
 
@@ -92,17 +91,26 @@
 python -m src.layer2_feature_engine_v2.batch_process
 ```
 
-### ASM Pipeline (Upcoming)
+### ASM Pipeline
 ```bash
-# TODO: ASM dataset builder
+# Build ASM dataset (112 features with Weekly VA)
 python scripts/build_asm_dataset_v1.py
 
-# TODO: ASM training
-python phase4_quality_tabular/train_asm_v1.py
+# Train ASM model
+python scripts/train_asm_v1.py --config_name C3_focal_inv_os --loss_type focal --oversample_shift
 
-# TODO: Shadow backtest ASM on S4_London
-python scripts/shadow_backtest_asm_on_S4.py
+# Shadow backtest ASM on S4_London
+python scripts/shadow_backtest_s4_asm_v1.py
 ```
+
+### ASM Models
+- **ASM-GRU64-v1.0-C3**: Baseline model (AUC_SHIFT=0.712, AUC_UP=0.779, AUC_DOWN=0.857)
+- Model path: `output/asm_models_v1/ASM-GRU64-v1.0-C3.pt`
+- Shadow backtest results: `backtests/s4_highvol_fvg_london_asm_v1_shadow.json`
+
+### Strategies / Modules
+- **S4_HighVol_FVG_London_v1**: Baseline rule-only strategy (LOCKED)
+- **S4_LDN_ASM_LowShift_0.2_v1.1**: 🔒 LOCKED – S4 HighVol FVG London + ASM v1.0 (p_shift ≤ 0.2). +59% expectancy vs baseline, -30% MaxDD trên NEW 6W data. See [PLAN_S4_HighVol_FVG_London_v1.md](PLAN_S4_HighVol_FVG_London_v1.md) and `backtests/s4_asm_lowshift_extval_new6w_v1.json`.
 
 ### Inference API
 ```bash
@@ -192,19 +200,32 @@ modeloutcome/
 - [x] TẦNG 0: SMC Core + Export
 - [x] TẦNG 1: Feature Engine (SMCContextManager)
 - [x] TẦNG 2: S4_London_v1 baseline strategy (LOCKED)
+- [x] TẦNG 3: ASM v1.x Dataset (112 features with Weekly VA)
+- [x] TẦNG 3: ASM v1.0 Training (ASM-GRU64-v1.0-C3)
+- [x] Shadow backtest ASM on S4_London
+- [x] **Inverse filter discovery**: p_shift ≤ 0.2 → WR 82.6%, Exp +1.48R
+- [x] Lock candidate strategy: S4_LDN_ASM_LowShift_0.2_v1.0
 - [x] Archive: Outcome Model v2.x, Pattern A, P2-Quality
 
 ### In Progress 🔄
-- [ ] TẦNG 3: ASM v1 Dataset
-- [ ] TẦNG 3: ASM v1 Training
+- [x] Extended validation: S4_LDN_ASM_LowShift_0.2_v1.0 on new 6W data → **PASS** (see `backtests/s4_asm_lowshift_extval_new6w_v1.json`)
+- [ ] Integrate ASM filter vào NT-AUTOBOT execution pipeline
 
 ### Next Steps 📋
-1. Build ASM dataset (VA-shift labels)
-2. Train ASM v1 (3-class classifier)
-3. Shadow backtest ASM on S4_London
-4. Integrate ASM filter vào execution pipeline
+1. ~~Validate inverse filter on out-of-sample data~~ ✅ DONE
+2. Implement ASM inference in production pipeline
+3. Monitor live performance of S4_LDN_ASM_LowShift_0.2
 
 ---
 
-**Version**: 4.0 (ASM Focus)  
-**Last Updated**: 2025-12-02
+## 📝 Experiment Log
+
+| Date | Experiment | Result |
+|------|------------|--------|
+| 2025-12-03 | Extended validation: S4_LDN_ASM_LowShift_0.2_v1.0 on new 6W data | **PASS** - Exp +0.85R (+59% vs baseline), WR 61.6%, MaxDD 26R |
+| 2025-12-03 | Lock S4_LDN_ASM_LowShift_0.2_v1.1 | 🔒 LOCKED – Ready for shadow trading |
+
+---
+
+**Version**: 4.4 (S4_LDN_ASM_LowShift_0.2_v1.1 LOCKED)  
+**Last Updated**: 2025-12-03
