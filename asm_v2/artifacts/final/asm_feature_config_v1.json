@@ -1,0 +1,28 @@
+{
+  "z_dim": 64,
+  "meta_dim": 6,
+  "meta_features": [
+    "session_id",
+    "pos_in_session_range",
+    "inside_value",
+    "above_value",
+    "below_value",
+    "minute_of_day_norm"
+  ],
+  "num_classes": 3,
+  "regime_to_idx": {
+    "1": 0,
+    "2": 1,
+    "3": 2
+  },
+  "idx_to_regime": {
+    "0": 1,
+    "1": 2,
+    "2": 3
+  },
+  "regime_names": {
+    "1": "trend_up",
+    "2": "trend_down",
+    "3": "balance"
+  }
+}

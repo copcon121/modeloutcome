@@ -21,6 +21,7 @@ class StateEncDatasetConfig:
     future_dir_threshold_down: float = -0.0005
     tick_size: float = 0.25
     min_bars_per_session: int = 64
+    max_samples: Optional[int] = None  # Limit total samples (for debug)
     sessions: Dict[str, Dict[str, int]] = field(default_factory=lambda: {
         "ASIA": {"start_hour": 18, "end_hour": 2},
         "LDN": {"start_hour": 2, "end_hour": 8},
@@ -52,20 +53,23 @@ class HeadConfig:
 
 @dataclass
 class StateEncModelConfig:
-    """Configuration for model architecture"""
+    """Configuration for model architecture v1.1"""
     input_dim: int = 95
-    d_model: int = 128
-    num_heads: int = 8
+    d_model: int = 96
+    num_heads: int = 4
     num_layers: int = 4
     dim_feedforward: int = 512
-    dropout: float = 0.1
+    dropout: float = 0.05
     sequence_length: int = 128
-    pooling: str = "last"  # "last", "mean", "cls"
-    positional_encoding: str = "sinusoidal"  # "sinusoidal", "learned"
+    pooling: str = "last"
+    conv_kernel: int = 5
+    use_rms_norm: bool = False
     heads: Dict[str, Dict[str, Any]] = field(default_factory=lambda: {
+        "mfm": {"enabled": True, "output_dim": 95},
+        "contrastive": {"enabled": True, "proj_dim": 96},
         "self_supervised": {"enabled": True, "num_dir_classes": 3, "predict_return": True},
         "regime": {"enabled": True, "num_classes": 6},
-        "meta_s4": {"enabled": True, "output_dim": 4}
+        "meta_s4": {"enabled": False, "output_dim": 4}
     })
     
     @classmethod
@@ -82,7 +86,7 @@ class StateEncModelConfig:
 
 @dataclass
 class StateEncTrainConfig:
-    """Configuration for training"""
+    """Configuration for training v1.1"""
     dataset_path: str
     feature_config_path: str
     model_config_path: str
@@ -91,14 +95,17 @@ class StateEncTrainConfig:
     max_epochs: int = 100
     learning_rate: float = 0.0001
     weight_decay: float = 0.01
-    warmup_epochs: int = 5
+    warmup_ratio: float = 0.05
     patience: int = 15
     val_split: float = 0.15
     test_split: float = 0.1
     loss_weights: Dict[str, float] = field(default_factory=lambda: {
-        "future_dir": 1.0,
+        "mfm": 1.0,
+        "contrastive": 0.7,
+        "future_dir": 0.5,
         "future_return": 0.1,
-        "regime": 0.5
+        "regime": 0.3,
+        "temperature": 0.1
     })
     device: str = "cuda"
     seed: int = 42

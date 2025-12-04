@@ -1,0 +1,555 @@
+{
+  "timestamp": "2025-12-04T04:34:57.108036",
+  "config": {
+    "version": "1.2",
+    "description": "Semantic evaluation config for STATE-ENC v1.2",
+    "model_path": "state_enc_v1/artifacts/v1_2/final/state_enc_v1.2.pt",
+    "model_config_path": "state_enc_v1/artifacts/v1_2/final/model_config_v1.2.json",
+    "feature_config_path": "state_enc_v1/artifacts/v1_2/final/feature_config_v1.2.json",
+    "dataset_path": "state_enc_v1/artifacts/encoder_dataset_real.jsonl",
+    "output_dir": "state_enc_v1/artifacts/v1_2/eval",
+    "batch_size": 64,
+    "max_samples": 2000,
+    "train_split": 0.8,
+    "kmeans_k": 8,
+    "baseline_features": [
+      "c",
+      "hl_range",
+      "body",
+      "delta",
+      "volume",
+      "premium_zone",
+      "inside_value",
+      "dist_to_vah",
+      "dist_to_val",
+      "ext_trend_dir",
+      "int_trend_dir",
+      "asm_regime_hint"
+    ],
+    "device": "cpu",
+    "tests": {
+      "S1_future_dir_probe": {
+        "enabled": true,
+        "description": "Compare baseline raw features vs z_t for predicting future_dir_5"
+      },
+      "S2_regime_probe": {
+        "enabled": true,
+        "description": "Probe z_t for predicting regime_hint"
+      },
+      "S3_cluster_analysis": {
+        "enabled": true,
+        "description": "KMeans clustering on z_t and analyze market behavior"
+      }
+    }
+  },
+  "S1_future_dir_probe": {
+    "baseline_raw": {
+      "accuracy": 0.4,
+      "macro_f1": 0.2991307634164777,
+      "features_used": [
+        "c",
+        "hl_range",
+        "body",
+        "delta",
+        "volume",
+        "premium_zone",
+        "inside_value",
+        "dist_to_vah",
+        "dist_to_val",
+        "ext_trend_dir",
+        "int_trend_dir",
+        "asm_regime_hint"
+      ],
+      "n_train": 1600,
+      "n_val": 400
+    },
+    "probe_z_t": {
+      "accuracy": 0.3725,
+      "macro_f1": 0.2798029875895143,
+      "z_t_dim": 64,
+      "n_train": 1600,
+      "n_val": 400
+    },
+    "comparison": {
+      "accuracy_improvement_pct": -6.87499982812501,
+      "f1_improvement_pct": -6.461313092669842,
+      "z_t_better": false
+    }
+  },
+  "S2_regime_probe": {
+    "accuracy": 0.35714285714285715,
+    "macro_f1": 0.3319574865826449,
+    "n_train": 1341,
+    "n_val": 336,
+    "num_classes": 6,
+    "confusion_matrix": [
+      [
+        5,
+        23,
+        11,
+        22,
+        11
+      ],
+      [
+        8,
+        44,
+        3,
+        9,
+        13
+      ],
+      [
+        8,
+        1,
+        42,
+        10,
+        4
+      ],
+      [
+        14,
+        15,
+        15,
+        16,
+        6
+      ],
+      [
+        5,
+        15,
+        8,
+        15,
+        13
+      ]
+    ],
+    "class_distribution": {
+      "1": 72,
+      "2": 77,
+      "3": 65,
+      "4": 66,
+      "5": 56
+    }
+  },
+  "S3_cluster_analysis": {
+    "kmeans_k": 8,
+    "total_samples": 2000,
+    "clusters": {
+      "cluster_0": {
+        "num_samples": 260,
+        "pct_of_total": 13.0,
+        "mean_future_return_5": 7.436494884231735e-05,
+        "std_future_return_5": 0.001931086370714681,
+        "mean_future_range_15": 0.0049673746305094624,
+        "mean_pos_in_session": 0.4789500778229833,
+        "regime_distribution": {
+          "0": {
+            "count": 30,
+            "pct": 11.538461538461538
+          },
+          "1": {
+            "count": 46,
+            "pct": 17.692307692307693
+          },
+          "2": {
+            "count": 32,
+            "pct": 12.307692307692308
+          },
+          "3": {
+            "count": 53,
+            "pct": 20.384615384615383
+          },
+          "4": {
+            "count": 51,
+            "pct": 19.615384615384617
+          },
+          "5": {
+            "count": 48,
+            "pct": 18.461538461538463
+          }
+        },
+        "future_dir_distribution": {
+          "-1": {
+            "count": 90,
+            "pct": 34.61538461538461
+          },
+          "0": {
+            "count": 61,
+            "pct": 23.46153846153846
+          },
+          "1": {
+            "count": 109,
+            "pct": 41.92307692307693
+          }
+        },
+        "dominant_regime": 3,
+        "dominant_future_dir": 1,
+        "description": "cluster_0: BEAR, UP, mid_range, neutral (260 samples)"
+      },
+      "cluster_1": {
+        "num_samples": 287,
+        "pct_of_total": 14.35,
+        "mean_future_return_5": -1.8752640934630052e-05,
+        "std_future_return_5": 0.001932917453234062,
+        "mean_future_range_15": 0.004880184599523601,
+        "mean_pos_in_session": 0.5073478996172354,
+        "regime_distribution": {
+          "0": {
+            "count": 51,
+            "pct": 17.770034843205575
+          },
+          "1": {
+            "count": 50,
+            "pct": 17.421602787456447
+          },
+          "2": {
+            "count": 39,
+            "pct": 13.588850174216027
+          },
+          "3": {
+            "count": 47,
+            "pct": 16.376306620209057
+          },
+          "4": {
+            "count": 55,
+            "pct": 19.16376306620209
+          },
+          "5": {
+            "count": 45,
+            "pct": 15.6794425087108
+          }
+        },
+        "future_dir_distribution": {
+          "-1": {
+            "count": 104,
+            "pct": 36.23693379790941
+          },
+          "0": {
+            "count": 75,
+            "pct": 26.132404181184672
+          },
+          "1": {
+            "count": 108,
+            "pct": 37.63066202090592
+          }
+        },
+        "dominant_regime": 4,
+        "dominant_future_dir": 1,
+        "description": "cluster_1: DRIVE, UP, mid_range, neutral (287 samples)"
+      },
+      "cluster_2": {
+        "num_samples": 235,
+        "pct_of_total": 11.75,
+        "mean_future_return_5": 0.00017797414289959305,
+        "std_future_return_5": 0.0020345270737930723,
+        "mean_future_range_15": 0.004933024417702511,
+        "mean_pos_in_session": 0.5100504796169885,
+        "regime_distribution": {
+          "0": {
+            "count": 47,
+            "pct": 20.0
+          },
+          "1": {
+            "count": 36,
+            "pct": 15.319148936170212
+          },
+          "2": {
+            "count": 38,
+            "pct": 16.170212765957448
+          },
+          "3": {
+            "count": 35,
+            "pct": 14.893617021276595
+          },
+          "4": {
+            "count": 47,
+            "pct": 20.0
+          },
+          "5": {
+            "count": 32,
+            "pct": 13.617021276595745
+          }
+        },
+        "future_dir_distribution": {
+          "-1": {
+            "count": 91,
+            "pct": 38.72340425531915
+          },
+          "0": {
+            "count": 45,
+            "pct": 19.148936170212767
+          },
+          "1": {
+            "count": 99,
+            "pct": 42.12765957446808
+          }
+        },
+        "dominant_regime": 0,
+        "dominant_future_dir": 1,
+        "description": "cluster_2: UNKNOWN, UP, mid_range, neutral (235 samples)"
+      },
+      "cluster_3": {
+        "num_samples": 181,
+        "pct_of_total": 9.049999999999999,
+        "mean_future_return_5": 4.203685879700686e-05,
+        "std_future_return_5": 0.0019969534054128267,
+        "mean_future_range_15": 0.004859929010708747,
+        "mean_pos_in_session": 0.5062399776826917,
+        "regime_distribution": {
+          "0": {
+            "count": 31,
+            "pct": 17.12707182320442
+          },
+          "1": {
+            "count": 26,
+            "pct": 14.3646408839779
+          },
+          "2": {
+            "count": 23,
+            "pct": 12.70718232044199
+          },
+          "3": {
+            "count": 38,
+            "pct": 20.994475138121548
+          },
+          "4": {
+            "count": 31,
+            "pct": 17.12707182320442
+          },
+          "5": {
+            "count": 32,
+            "pct": 17.67955801104972
+          }
+        },
+        "future_dir_distribution": {
+          "-1": {
+            "count": 75,
+            "pct": 41.43646408839779
+          },
+          "0": {
+            "count": 33,
+            "pct": 18.23204419889503
+          },
+          "1": {
+            "count": 73,
+            "pct": 40.331491712707184
+          }
+        },
+        "dominant_regime": 3,
+        "dominant_future_dir": -1,
+        "description": "cluster_3: BEAR, DOWN, mid_range, neutral (181 samples)"
+      },
+      "cluster_4": {
+        "num_samples": 226,
+        "pct_of_total": 11.3,
+        "mean_future_return_5": -0.00021108358108273698,
+        "std_future_return_5": 0.001973163383813772,
+        "mean_future_range_15": 0.005029765267610334,
+        "mean_pos_in_session": 0.5354463273021787,
+        "regime_distribution": {
+          "0": {
+            "count": 35,
+            "pct": 15.486725663716813
+          },
+          "1": {
+            "count": 35,
+            "pct": 15.486725663716813
+          },
+          "2": {
+            "count": 43,
+            "pct": 19.02654867256637
+          },
+          "3": {
+            "count": 41,
+            "pct": 18.141592920353983
+          },
+          "4": {
+            "count": 39,
+            "pct": 17.25663716814159
+          },
+          "5": {
+            "count": 33,
+            "pct": 14.601769911504425
+          }
+        },
+        "future_dir_distribution": {
+          "-1": {
+            "count": 98,
+            "pct": 43.36283185840708
+          },
+          "0": {
+            "count": 47,
+            "pct": 20.79646017699115
+          },
+          "1": {
+            "count": 81,
+            "pct": 35.84070796460177
+          }
+        },
+        "dominant_regime": 2,
+        "dominant_future_dir": -1,
+        "description": "cluster_4: BULL, DOWN, mid_range, neutral (226 samples)"
+      },
+      "cluster_5": {
+        "num_samples": 251,
+        "pct_of_total": 12.55,
+        "mean_future_return_5": 9.12184752108427e-05,
+        "std_future_return_5": 0.0019201798291787198,
+        "mean_future_range_15": 0.005244075942367131,
+        "mean_pos_in_session": 0.4793667220279916,
+        "regime_distribution": {
+          "0": {
+            "count": 36,
+            "pct": 14.342629482071715
+          },
+          "1": {
+            "count": 39,
+            "pct": 15.53784860557769
+          },
+          "2": {
+            "count": 60,
+            "pct": 23.904382470119522
+          },
+          "3": {
+            "count": 34,
+            "pct": 13.545816733067728
+          },
+          "4": {
+            "count": 38,
+            "pct": 15.139442231075698
+          },
+          "5": {
+            "count": 44,
+            "pct": 17.52988047808765
+          }
+        },
+        "future_dir_distribution": {
+          "-1": {
+            "count": 97,
+            "pct": 38.645418326693225
+          },
+          "0": {
+            "count": 59,
+            "pct": 23.50597609561753
+          },
+          "1": {
+            "count": 95,
+            "pct": 37.84860557768924
+          }
+        },
+        "dominant_regime": 2,
+        "dominant_future_dir": -1,
+        "description": "cluster_5: BULL, DOWN, mid_range, neutral (251 samples)"
+      },
+      "cluster_6": {
+        "num_samples": 309,
+        "pct_of_total": 15.45,
+        "mean_future_return_5": 0.0002047307997144241,
+        "std_future_return_5": 0.002219155665031541,
+        "mean_future_range_15": 0.0051614044155248295,
+        "mean_pos_in_session": 0.5122283951173833,
+        "regime_distribution": {
+          "0": {
+            "count": 59,
+            "pct": 19.093851132686083
+          },
+          "1": {
+            "count": 49,
+            "pct": 15.857605177993527
+          },
+          "2": {
+            "count": 62,
+            "pct": 20.06472491909385
+          },
+          "3": {
+            "count": 42,
+            "pct": 13.592233009708737
+          },
+          "4": {
+            "count": 46,
+            "pct": 14.886731391585762
+          },
+          "5": {
+            "count": 51,
+            "pct": 16.50485436893204
+          }
+        },
+        "future_dir_distribution": {
+          "-1": {
+            "count": 117,
+            "pct": 37.86407766990291
+          },
+          "0": {
+            "count": 47,
+            "pct": 15.210355987055015
+          },
+          "1": {
+            "count": 145,
+            "pct": 46.92556634304207
+          }
+        },
+        "dominant_regime": 2,
+        "dominant_future_dir": 1,
+        "description": "cluster_6: BULL, UP, mid_range, neutral (309 samples)"
+      },
+      "cluster_7": {
+        "num_samples": 251,
+        "pct_of_total": 12.55,
+        "mean_future_return_5": 2.5578087837721225e-05,
+        "std_future_return_5": 0.002123337783406449,
+        "mean_future_range_15": 0.0049484374400275135,
+        "mean_pos_in_session": 0.5225946696534507,
+        "regime_distribution": {
+          "0": {
+            "count": 34,
+            "pct": 13.545816733067728
+          },
+          "1": {
+            "count": 42,
+            "pct": 16.733067729083665
+          },
+          "2": {
+            "count": 51,
+            "pct": 20.318725099601593
+          },
+          "3": {
+            "count": 33,
+            "pct": 13.147410358565736
+          },
+          "4": {
+            "count": 53,
+            "pct": 21.115537848605577
+          },
+          "5": {
+            "count": 38,
+            "pct": 15.139442231075698
+          }
+        },
+        "future_dir_distribution": {
+          "-1": {
+            "count": 99,
+            "pct": 39.44223107569721
+          },
+          "0": {
+            "count": 58,
+            "pct": 23.107569721115535
+          },
+          "1": {
+            "count": 94,
+            "pct": 37.45019920318725
+          }
+        },
+        "dominant_regime": 4,
+        "dominant_future_dir": -1,
+        "description": "cluster_7: DRIVE, DOWN, mid_range, neutral (251 samples)"
+      }
+    },
+    "cluster_descriptions": [
+      "cluster_0: BEAR, UP, mid_range, neutral (260 samples)",
+      "cluster_1: DRIVE, UP, mid_range, neutral (287 samples)",
+      "cluster_2: UNKNOWN, UP, mid_range, neutral (235 samples)",
+      "cluster_3: BEAR, DOWN, mid_range, neutral (181 samples)",
+      "cluster_4: BULL, DOWN, mid_range, neutral (226 samples)",
+      "cluster_5: BULL, DOWN, mid_range, neutral (251 samples)",
+      "cluster_6: BULL, UP, mid_range, neutral (309 samples)",
+      "cluster_7: DRIVE, DOWN, mid_range, neutral (251 samples)"
+    ],
+    "inertia": 6328.29052734375
+  }
+}

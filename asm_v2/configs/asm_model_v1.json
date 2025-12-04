@@ -1,0 +1,9 @@
+{
+  "z_dim": 64,
+  "meta_dim": 6,
+  "hidden_dim": 128,
+  "num_layers": 2,
+  "dropout": 0.1,
+  "num_classes": 5,
+  "use_grn": true
+}

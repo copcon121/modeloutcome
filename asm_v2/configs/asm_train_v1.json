@@ -1,0 +1,16 @@
+{
+  "dataset_path": "asm_v2/artifacts/gc_m1/asm_dataset_gc_m1_v1.jsonl",
+  "splits_path": "asm_v2/artifacts/gc_m1/splits_gc_m1_v1.json",
+  "model_config_path": "asm_v2/configs/asm_model_v1.json",
+  "feature_config_path": "asm_v2/artifacts/final/asm_feature_config_v1.json",
+  "output_dir": "asm_v2/artifacts/final",
+  "batch_size": 64,
+  "epochs": 10,
+  "learning_rate": 0.001,
+  "weight_decay": 0.01,
+  "warmup_ratio": 0.1,
+  "label_smoothing": 0.05,
+  "device": "cuda",
+  "seed": 42,
+  "save_best": true
+}

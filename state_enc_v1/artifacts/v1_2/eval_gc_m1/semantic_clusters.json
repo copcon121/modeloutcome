@@ -1,0 +1,263 @@
+{
+  "kmeans_k": 6,
+  "total_samples": 4228,
+  "clusters": {
+    "cluster_0": {
+      "num_samples": 2059,
+      "pct_of_total": 48.69914853358562,
+      "mean_future_return_5": 2.773727132342032e-05,
+      "std_future_return_5": 0.0008080022752958973,
+      "mean_pos_in_session": 0.757218448232128,
+      "regime_distribution": {
+        "0": {
+          "count": 833,
+          "pct": 40.45653229723167
+        },
+        "1": {
+          "count": 58,
+          "pct": 2.8169014084507045
+        },
+        "2": {
+          "count": 934,
+          "pct": 45.36182612918893
+        },
+        "3": {
+          "count": 234,
+          "pct": 11.364740165128703
+        }
+      },
+      "future_dir_distribution": {
+        "-1": {
+          "count": 375,
+          "pct": 18.21272462360369
+        },
+        "0": {
+          "count": 1268,
+          "pct": 61.58329286061195
+        },
+        "1": {
+          "count": 416,
+          "pct": 20.20398251578436
+        }
+      },
+      "dominant_regime": 2,
+      "dominant_future_dir": 0,
+      "description": "cluster_0: BULL, FLAT, near_high, neutral (2059 samples)"
+    },
+    "cluster_1": {
+      "num_samples": 223,
+      "pct_of_total": 5.274361400189215,
+      "mean_future_return_5": -1.9743751570085213e-05,
+      "std_future_return_5": 0.0007394507005962497,
+      "mean_pos_in_session": 0.5580709152524009,
+      "regime_distribution": {
+        "0": {
+          "count": 87,
+          "pct": 39.01345291479821
+        },
+        "1": {
+          "count": 3,
+          "pct": 1.345291479820628
+        },
+        "2": {
+          "count": 82,
+          "pct": 36.771300448430495
+        },
+        "3": {
+          "count": 51,
+          "pct": 22.869955156950674
+        }
+      },
+      "future_dir_distribution": {
+        "-1": {
+          "count": 39,
+          "pct": 17.48878923766816
+        },
+        "0": {
+          "count": 151,
+          "pct": 67.71300448430493
+        },
+        "1": {
+          "count": 33,
+          "pct": 14.798206278026907
+        }
+      },
+      "dominant_regime": 0,
+      "dominant_future_dir": 0,
+      "description": "cluster_1: UNKNOWN, FLAT, mid_range, neutral (223 samples)"
+    },
+    "cluster_2": {
+      "num_samples": 169,
+      "pct_of_total": 3.9971617786187323,
+      "mean_future_return_5": 7.992132920257187e-05,
+      "std_future_return_5": 0.0006748741022237264,
+      "mean_pos_in_session": 0.5034048048731536,
+      "regime_distribution": {
+        "0": {
+          "count": 72,
+          "pct": 42.60355029585799
+        },
+        "2": {
+          "count": 62,
+          "pct": 36.68639053254438
+        },
+        "3": {
+          "count": 35,
+          "pct": 20.710059171597635
+        }
+      },
+      "future_dir_distribution": {
+        "-1": {
+          "count": 24,
+          "pct": 14.201183431952662
+        },
+        "0": {
+          "count": 107,
+          "pct": 63.31360946745562
+        },
+        "1": {
+          "count": 38,
+          "pct": 22.485207100591715
+        }
+      },
+      "dominant_regime": 0,
+      "dominant_future_dir": 0,
+      "description": "cluster_2: UNKNOWN, FLAT, mid_range, neutral (169 samples)"
+    },
+    "cluster_3": {
+      "num_samples": 239,
+      "pct_of_total": 5.65279091769158,
+      "mean_future_return_5": 5.038058524944442e-05,
+      "std_future_return_5": 0.0007384290982576616,
+      "mean_pos_in_session": 0.5983805381410463,
+      "regime_distribution": {
+        "0": {
+          "count": 83,
+          "pct": 34.72803347280335
+        },
+        "1": {
+          "count": 4,
+          "pct": 1.6736401673640167
+        },
+        "2": {
+          "count": 99,
+          "pct": 41.42259414225941
+        },
+        "3": {
+          "count": 53,
+          "pct": 22.17573221757322
+        }
+      },
+      "future_dir_distribution": {
+        "-1": {
+          "count": 38,
+          "pct": 15.899581589958158
+        },
+        "0": {
+          "count": 146,
+          "pct": 61.08786610878661
+        },
+        "1": {
+          "count": 55,
+          "pct": 23.01255230125523
+        }
+      },
+      "dominant_regime": 2,
+      "dominant_future_dir": 0,
+      "description": "cluster_3: BULL, FLAT, mid_range, neutral (239 samples)"
+    },
+    "cluster_4": {
+      "num_samples": 354,
+      "pct_of_total": 8.37275307473983,
+      "mean_future_return_5": -2.5849274718911678e-05,
+      "std_future_return_5": 0.0012136171241424012,
+      "mean_pos_in_session": 0.5897978481507044,
+      "regime_distribution": {
+        "0": {
+          "count": 156,
+          "pct": 44.06779661016949
+        },
+        "1": {
+          "count": 7,
+          "pct": 1.977401129943503
+        },
+        "2": {
+          "count": 104,
+          "pct": 29.37853107344633
+        },
+        "3": {
+          "count": 87,
+          "pct": 24.576271186440678
+        }
+      },
+      "future_dir_distribution": {
+        "-1": {
+          "count": 78,
+          "pct": 22.033898305084744
+        },
+        "0": {
+          "count": 198,
+          "pct": 55.932203389830505
+        },
+        "1": {
+          "count": 78,
+          "pct": 22.033898305084744
+        }
+      },
+      "dominant_regime": 0,
+      "dominant_future_dir": 0,
+      "description": "cluster_4: UNKNOWN, FLAT, mid_range, neutral (354 samples)"
+    },
+    "cluster_5": {
+      "num_samples": 1184,
+      "pct_of_total": 28.00378429517502,
+      "mean_future_return_5": -1.745467782551268e-05,
+      "std_future_return_5": 0.0007982859579106406,
+      "mean_pos_in_session": 0.26781296685128003,
+      "regime_distribution": {
+        "0": {
+          "count": 516,
+          "pct": 43.58108108108108
+        },
+        "1": {
+          "count": 29,
+          "pct": 2.449324324324324
+        },
+        "2": {
+          "count": 145,
+          "pct": 12.246621621621621
+        },
+        "3": {
+          "count": 494,
+          "pct": 41.72297297297297
+        }
+      },
+      "future_dir_distribution": {
+        "-1": {
+          "count": 205,
+          "pct": 17.31418918918919
+        },
+        "0": {
+          "count": 756,
+          "pct": 63.85135135135135
+        },
+        "1": {
+          "count": 223,
+          "pct": 18.83445945945946
+        }
+      },
+      "dominant_regime": 0,
+      "dominant_future_dir": 0,
+      "description": "cluster_5: UNKNOWN, FLAT, near_low, neutral (1184 samples)"
+    }
+  },
+  "cluster_descriptions": [
+    "cluster_0: BULL, FLAT, near_high, neutral (2059 samples)",
+    "cluster_1: UNKNOWN, FLAT, mid_range, neutral (223 samples)",
+    "cluster_2: UNKNOWN, FLAT, mid_range, neutral (169 samples)",
+    "cluster_3: BULL, FLAT, mid_range, neutral (239 samples)",
+    "cluster_4: UNKNOWN, FLAT, mid_range, neutral (354 samples)",
+    "cluster_5: UNKNOWN, FLAT, near_low, neutral (1184 samples)"
+  ],
+  "inertia": 1033.7021484375
+}

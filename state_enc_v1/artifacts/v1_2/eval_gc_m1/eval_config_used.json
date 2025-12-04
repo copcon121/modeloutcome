@@ -1,0 +1,40 @@
+{
+  "version": "1.2",
+  "description": "Semantic evaluation config for STATE-ENC v1.2 on GC M1 real data",
+  "model_path": "state_enc_v1/artifacts/v1_2/final/state_enc_v1.2.pt",
+  "model_config_path": "state_enc_v1/artifacts/v1_2/final/model_config_v1.2.json",
+  "feature_config_path": "state_enc_v1/artifacts/gc_m1/feature_config_gc_m1_v1.2.json",
+  "dataset_path": "state_enc_v1/artifacts/gc_m1/encoder_dataset_gc_m1_v1.2.jsonl",
+  "output_dir": "state_enc_v1/artifacts/v1_2/eval_gc_m1",
+  "batch_size": 64,
+  "max_samples": 50000,
+  "train_split": 0.8,
+  "kmeans_k": 6,
+  "baseline_features": [
+    "c",
+    "hl_range",
+    "body",
+    "delta",
+    "volume",
+    "inside_value",
+    "dist_to_vah",
+    "dist_to_val",
+    "ext_trend_dir",
+    "int_trend_dir"
+  ],
+  "device": "cpu",
+  "tests": {
+    "S1_future_dir_probe": {
+      "enabled": true,
+      "description": "Compare baseline raw features vs z_t for predicting future_dir_5"
+    },
+    "S2_regime_probe": {
+      "enabled": true,
+      "description": "Probe z_t for predicting regime_hint"
+    },
+    "S3_cluster_analysis": {
+      "enabled": true,
+      "description": "KMeans clustering on z_t and analyze market behavior"
+    }
+  }
+}

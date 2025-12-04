@@ -1,0 +1,39 @@
+{
+  "version": "1.1",
+  "timestamp": "2025-12-04T02:37:26.754913",
+  "training": {
+    "total_samples": 43,
+    "epochs": 3,
+    "best_val_loss": 0.6326534748077393,
+    "parameters": 342179,
+    "z_t_dim": 64
+  },
+  "tests": {
+    "test1_stability": {
+      "pass": true,
+      "stable_pairs": 10,
+      "total_pairs": 10,
+      "avg_distance": 0.013473528623580932
+    },
+    "test2_shock": {
+      "pass": true,
+      "distance": 0.10587596893310547
+    },
+    "test3_missing": {
+      "pass": true,
+      "distance": 0.003955662250518799,
+      "masked_bars": 3
+    },
+    "test4_regime_bias": {
+      "pass": true,
+      "distribution": {
+        "3": 31,
+        "4": 56,
+        "1": 12,
+        "2": 1
+      },
+      "max_class_pct": 56.00000000000001
+    }
+  },
+  "all_tests_passed": true
+}

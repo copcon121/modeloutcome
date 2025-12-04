@@ -1,0 +1,20 @@
+{
+  "raw_bars_path": "data/bars_enhanced.jsonl",
+  "output_path": "state_enc_v1/artifacts/debug/encoder_dataset_debug.jsonl",
+  "feature_config_path": "state_enc_v1/artifacts/debug/feature_config_debug.json",
+  "sequence_length": 64,
+  "stride": 16,
+  "future_bars": 5,
+  "future_dir_threshold_up": 0.0005,
+  "future_dir_threshold_down": -0.0005,
+  "tick_size": 0.25,
+  "min_bars_per_session": 32,
+  "max_samples": 500,
+  "sessions": {
+    "ASIA": {"start_hour": 18, "end_hour": 2},
+    "LDN": {"start_hour": 2, "end_hour": 8},
+    "NY": {"start_hour": 8, "end_hour": 17}
+  },
+  "symbol": "NQ",
+  "timeframe": "M1"
+}

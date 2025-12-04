@@ -1,0 +1,445 @@
+{
+  "feature_names": [
+    "o",
+    "h",
+    "l",
+    "c",
+    "hl_range",
+    "body",
+    "upper_wick",
+    "lower_wick",
+    "bar_type",
+    "volume",
+    "volume_vs_session_avg",
+    "volume_zscore",
+    "atr_m1_14",
+    "true_range",
+    "range_vs_session_avg",
+    "delta",
+    "delta_abs",
+    "delta_sign",
+    "delta_vs_volume",
+    "cum_delta_session",
+    "delta_zscore_session",
+    "tick_count",
+    "tick_speed",
+    "buy_volume",
+    "sell_volume",
+    "buy_ratio",
+    "sell_ratio",
+    "imbalance_buy_sell",
+    "ext_trend_dir",
+    "int_trend_dir",
+    "ext_bos_up",
+    "ext_bos_down",
+    "ext_choch_up",
+    "ext_choch_down",
+    "bars_since_last_ext_bos",
+    "bars_since_last_ext_choch",
+    "int_bos_up",
+    "int_bos_down",
+    "int_choch_up",
+    "int_choch_down",
+    "bars_since_last_int_bos",
+    "bars_since_last_int_choch",
+    "swing_high",
+    "swing_low",
+    "price_vs_swing_mid",
+    "premium_zone",
+    "discount_zone",
+    "distance_to_swing_high",
+    "distance_to_swing_low",
+    "distance_to_swing_high_norm",
+    "distance_to_swing_low_norm",
+    "sweep_prev_high",
+    "sweep_prev_low",
+    "sweep_type",
+    "bars_since_last_sweep",
+    "near_ob_m1_bull",
+    "near_ob_m1_bear",
+    "near_ob_m5_bull",
+    "near_ob_m5_bear",
+    "ob_age_bars",
+    "distance_to_nearest_ob",
+    "near_fvg_m1_bull",
+    "near_fvg_m1_bear",
+    "near_fvg_m5_bull",
+    "near_fvg_m5_bear",
+    "fvg_age_bars",
+    "distance_to_nearest_fvg",
+    "vah",
+    "val",
+    "poc",
+    "dist_to_vah",
+    "dist_to_val",
+    "dist_to_poc",
+    "inside_value",
+    "above_value",
+    "below_value",
+    "session_high",
+    "session_low",
+    "pos_in_session_range",
+    "dist_to_session_high_norm",
+    "dist_to_session_low_norm",
+    "session_id",
+    "bar_index_in_session",
+    "bar_index_in_session_norm",
+    "minute_of_day",
+    "minute_of_day_norm",
+    "day_of_week",
+    "asm_regime_hint"
+  ],
+  "feature_dim": 88,
+  "normalization": {
+    "config": {
+      "method": "zscore",
+      "clip_zscore": 5.0,
+      "eps": 1e-08
+    },
+    "stats": {
+      "o": {
+        "mean": 17264.345032703488,
+        "std": 30.64940510896468,
+        "min_val": 17214.26,
+        "max_val": 17334.89
+      },
+      "h": {
+        "mean": 17265.670872093026,
+        "std": 30.636316664410906,
+        "min_val": 17214.39,
+        "max_val": 17337.84
+      },
+      "l": {
+        "mean": 17263.009087936047,
+        "std": 30.6106786192156,
+        "min_val": 17213.54,
+        "max_val": 17334.4
+      },
+      "c": {
+        "mean": 17264.31494549419,
+        "std": 30.591809250125703,
+        "min_val": 17213.54,
+        "max_val": 17336.05
+      },
+      "hl_range": {
+        "mean": 2.6617841569767835,
+        "std": 1.2290793798159612,
+        "min_val": 0.11999999999898137,
+        "max_val": 8.319999999999709
+      },
+      "body": {
+        "mean": -0.03008720930226451,
+        "std": 1.0274957978934367,
+        "min_val": -3.7400000000016007,
+        "max_val": 3.139999999999418
+      },
+      "upper_wick": {
+        "mean": 0.9346584302325384,
+        "std": 0.8883470261602978,
+        "min_val": 0.0,
+        "max_val": 5.039999999997235
+      },
+      "lower_wick": {
+        "mean": 0.9146765988372432,
+        "std": 0.9301800594965624,
+        "min_val": 0.0,
+        "max_val": 5.620000000002619
+      },
+      "volume": {
+        "mean": 979.8026889534884,
+        "std": 301.43579253158885,
+        "min_val": 43.0,
+        "max_val": 1765.0
+      },
+      "volume_vs_session_avg": {
+        "mean": 0.9972255678143565,
+        "std": 0.30689587172718197,
+        "min_val": 0.04452113891285591,
+        "max_val": 1.8274374460742018
+      },
+      "volume_zscore": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "atr_m1_14": {
+        "mean": 4.000025436046512,
+        "std": 0.950730546551802,
+        "min_val": 1.08,
+        "max_val": 6.83
+      },
+      "true_range": {
+        "mean": 2.6617841569767835,
+        "std": 1.2290793798159612,
+        "min_val": 0.11999999999898137,
+        "max_val": 8.319999999999709
+      },
+      "range_vs_session_avg": {
+        "mean": 0.9993088631904519,
+        "std": 0.4615223359338792,
+        "min_val": 0.04455997029297495,
+        "max_val": 3.1677136874164784
+      },
+      "delta": {
+        "mean": 12.829578488372093,
+        "std": 230.55481228948662,
+        "min_val": -649.0,
+        "max_val": 619.0
+      },
+      "delta_abs": {
+        "mean": 189.79760174418604,
+        "std": 131.51802129063648,
+        "min_val": 0.0,
+        "max_val": 649.0
+      },
+      "delta_vs_volume": {
+        "mean": 0.014598326186159727,
+        "std": 0.22685902612818507,
+        "min_val": -0.400213447171825,
+        "max_val": 0.39930313588850175
+      },
+      "cum_delta_session": {
+        "mean": 4717.437136627907,
+        "std": 2105.2718000759314,
+        "min_val": -1245.0,
+        "max_val": 10330.0
+      },
+      "delta_zscore_session": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "tick_count": {
+        "mean": 783.4269622093024,
+        "std": 241.18164272303943,
+        "min_val": 34.0,
+        "max_val": 1412.0
+      },
+      "tick_speed": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "buy_volume": {
+        "mean": 496.3161337209302,
+        "std": 190.70721061240368,
+        "min_val": 15.0,
+        "max_val": 1102.0
+      },
+      "sell_volume": {
+        "mean": 483.48655523255815,
+        "std": 188.78635826563317,
+        "min_val": 28.0,
+        "max_val": 1144.0
+      },
+      "buy_ratio": {
+        "mean": 0.50729916309308,
+        "std": 0.11342951806409253,
+        "min_val": 0.29989327641408753,
+        "max_val": 0.6996515679442509
+      },
+      "sell_ratio": {
+        "mean": 0.49270083690692007,
+        "std": 0.11342951806409253,
+        "min_val": 0.3003484320557491,
+        "max_val": 0.7001067235859125
+      },
+      "imbalance_buy_sell": {
+        "mean": 0.014598326186159727,
+        "std": 0.22685902612818507,
+        "min_val": -0.400213447171825,
+        "max_val": 0.39930313588850175
+      },
+      "bars_since_last_ext_bos": {
+        "mean": 999.0,
+        "std": 1e-08,
+        "min_val": 999.0,
+        "max_val": 999.0
+      },
+      "bars_since_last_ext_choch": {
+        "mean": 999.0,
+        "std": 1e-08,
+        "min_val": 999.0,
+        "max_val": 999.0
+      },
+      "bars_since_last_int_bos": {
+        "mean": 999.0,
+        "std": 1e-08,
+        "min_val": 999.0,
+        "max_val": 999.0
+      },
+      "bars_since_last_int_choch": {
+        "mean": 999.0,
+        "std": 1e-08,
+        "min_val": 999.0,
+        "max_val": 999.0
+      },
+      "swing_high": {
+        "mean": 17294.345032703488,
+        "std": 30.64940510896468,
+        "min_val": 17244.26,
+        "max_val": 17364.89
+      },
+      "swing_low": {
+        "mean": 17234.345032703488,
+        "std": 30.64940510896468,
+        "min_val": 17184.26,
+        "max_val": 17304.89
+      },
+      "price_vs_swing_mid": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "distance_to_swing_high": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "distance_to_swing_low": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "distance_to_swing_high_norm": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "distance_to_swing_low_norm": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "bars_since_last_sweep": {
+        "mean": 999.0,
+        "std": 1e-08,
+        "min_val": 999.0,
+        "max_val": 999.0
+      },
+      "ob_age_bars": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "distance_to_nearest_ob": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "fvg_age_bars": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "distance_to_nearest_fvg": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "vah": {
+        "mean": 17279.345032703488,
+        "std": 30.64940510896468,
+        "min_val": 17229.26,
+        "max_val": 17349.89
+      },
+      "val": {
+        "mean": 17249.345032703488,
+        "std": 30.64940510896468,
+        "min_val": 17199.26,
+        "max_val": 17319.89
+      },
+      "poc": {
+        "mean": 17264.345032703488,
+        "std": 30.64940510896468,
+        "min_val": 17214.26,
+        "max_val": 17334.89
+      },
+      "dist_to_vah": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "dist_to_val": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "dist_to_poc": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "session_high": {
+        "mean": 17304.187906976742,
+        "std": 37.821687436730386,
+        "min_val": 17261.68,
+        "max_val": 17337.84
+      },
+      "session_low": {
+        "mean": 17223.692558139537,
+        "std": 9.033304819508631,
+        "min_val": 17213.54,
+        "max_val": 17231.73
+      },
+      "pos_in_session_range": {
+        "mean": 0.5113391501629295,
+        "std": 0.23802847427090681,
+        "min_val": 0.0,
+        "max_val": 0.991275446614003
+      },
+      "dist_to_session_high_norm": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "dist_to_session_low_norm": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "bar_index_in_session": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "bar_index_in_session_norm": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "minute_of_day": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      },
+      "minute_of_day_norm": {
+        "mean": 0.0,
+        "std": 1e-08,
+        "min_val": 0.0,
+        "max_val": 0.0
+      }
+    },
+    "is_fitted": true
+  }
+}

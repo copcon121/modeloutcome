@@ -1,0 +1,53 @@
+{
+  "validation": {
+    "accuracy": 0.89738430583501,
+    "macro_f1": 0.6094605475040258,
+    "per_class_f1": {
+      "0": 0.0,
+      "1": 0.925,
+      "2": 0.9033816425120773
+    },
+    "confusion_matrix": [
+      [
+        0,
+        11,
+        9
+      ],
+      [
+        0,
+        259,
+        14
+      ],
+      [
+        0,
+        17,
+        187
+      ]
+    ],
+    "avg_loss": 0.0,
+    "num_samples": 497
+  },
+  "semantic": {
+    "per_session_accuracy": {
+      "ASIA": {
+        "accuracy": 0.9209995969367191,
+        "total": 2481
+      }
+    },
+    "per_regime_accuracy": {
+      "trend_up": {
+        "accuracy": 0.019801980198019802,
+        "total": 101
+      },
+      "trend_down": {
+        "accuracy": 0.9663394109396914,
+        "total": 1426
+      },
+      "balance": {
+        "accuracy": 0.9486373165618449,
+        "total": 954
+      }
+    },
+    "total_samples": 2481
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "version": "1.0",
+  "description": "S4_LDN Policy Backtest Configuration for GC M1 (Full)",
+  
+  "paths": {
+    "enriched_trades": "asm_v2/artifacts/gc_m1/s4_ldn_trades_enriched_gc_m1_v1.2.jsonl",
+    "output_dir": "asm_v2/artifacts/gc_m1"
+  },
+  
+  "splits": {
+    "train_ratio": 0.6,
+    "val_ratio": 0.2,
+    "test_ratio": 0.2
+  },
+  
+  "backtest": {
+    "min_trades_for_valid_policy": 5,
+    "sort_by": "expectancy"
+  },
+  
+  "policies": [
+    {
+      "name": "P0_baseline_all",
+      "policy_type": "baseline",
+      "params": {}
+    },
+    {
+      "name": "P1_regime_trend_down",
+      "policy_type": "regime_only",
+      "params": {"regimes": ["trend_down"]}
+    },
+    {
+      "name": "P2_regime_trend_up",
+      "policy_type": "regime_only",
+      "params": {"regimes": ["trend_up"]}
+    },
+    {
+      "name": "P3_regime_no_balance",
+      "policy_type": "regime_exclude",
+      "params": {"exclude_regimes": ["balance"]}
+    },
+    {
+      "name": "P4_session_ldn",
+      "policy_type": "session",
+      "params": {"sessions": ["LDN"]}
+    },
+    {
+      "name": "P5_session_asia",
+      "policy_type": "session",
+      "params": {"sessions": ["ASIA"]}
+    },
+    {
+      "name": "P6_session_ny",
+      "policy_type": "session",
+      "params": {"sessions": ["NY"]}
+    },
+    {
+      "name": "P7_direction_aligned",
+      "policy_type": "direction_regime",
+      "params": {"strict": true, "allow_balance": false}
+    },
+    {
+      "name": "P8_direction_aligned_balance",
+      "policy_type": "direction_regime",
+      "params": {"strict": true, "allow_balance": true}
+    },
+    {
+      "name": "P9_combo_trend_ldn",
+      "policy_type": "combo",
+      "params": {
+        "regimes": ["trend_down", "trend_up"],
+        "sessions": ["LDN"]
+      }
+    },
+    {
+      "name": "P10_combo_trend_down_mid",
+      "policy_type": "combo",
+      "params": {
+        "regimes": ["trend_down"],
+        "pos_range": [0.2, 0.8]
+      }
+    },
+    {
+      "name": "P11_short_trend_down",
+      "policy_type": "combo",
+      "params": {
+        "regimes": ["trend_down"],
+        "directions": ["short"]
+      }
+    },
+    {
+      "name": "P12_long_trend_up",
+      "policy_type": "combo",
+      "params": {
+        "regimes": ["trend_up"],
+        "directions": ["long"]
+      }
+    },
+    {
+      "name": "P13_ldn_trend_short",
+      "policy_type": "combo",
+      "params": {
+        "regimes": ["trend_down"],
+        "sessions": ["LDN"],
+        "directions": ["short"]
+      }
+    }
+  ],
+  
+  "meta_model": {
+    "enabled": true,
+    "thresholds": [0.4, 0.5, 0.6, 0.7]
+  }
+}

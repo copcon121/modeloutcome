@@ -1,0 +1,24 @@
+{
+  "version": "1.2",
+  "description": "Encoder dataset config for GC M1 NEW DATA (OOS Phase 3)",
+  
+  "paths": {
+    "raw_data_dir": "data/raw/new_data",
+    "raw_pattern": "smc_export_gc_m1_v3_*.jsonl",
+    "output_dir": "state_enc_v1/artifacts/gc_m1_new",
+    "bars_enhanced": "state_enc_v1/artifacts/gc_m1_new/bars_enhanced_gc_m1_newdata.jsonl",
+    "encoder_dataset": "state_enc_v1/artifacts/gc_m1_new/encoder_dataset_gc_m1_newdata_v1.2.jsonl"
+  },
+  
+  "feature_config": "state_enc_v1/artifacts/v1_2/final/feature_config_v1.2.json",
+  "model_config": "state_enc_v1/artifacts/v1_2/final/model_config_v1.2.json",
+  
+  "dataset": {
+    "sequence_length": 64,
+    "stride": 16,
+    "min_bars_per_session": 30
+  },
+  
+  "symbol": "GC",
+  "tf": "M1"
+}

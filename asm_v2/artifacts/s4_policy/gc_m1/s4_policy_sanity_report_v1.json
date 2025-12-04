@@ -1,0 +1,85 @@
+{
+  "all_passed": true,
+  "n_tests": 6,
+  "n_passed": 6,
+  "n_failed": 0,
+  "tests": [
+    {
+      "test": "T1_TimeSplitSanity",
+      "passed": true,
+      "details": {
+        "train_dates_count": 3,
+        "val_dates_count": 1,
+        "overlap_count": 0,
+        "overlap_dates": [],
+        "chronological_order": true,
+        "train_samples": 4,
+        "val_samples": 1
+      }
+    },
+    {
+      "test": "T2_LabelShuffle",
+      "passed": true,
+      "details": {
+        "skipped": true,
+        "reason": "Too few samples for meaningful test",
+        "train_samples": 4,
+        "val_samples": 1
+      }
+    },
+    {
+      "test": "T3_FutureFieldGuard",
+      "passed": true,
+      "details": {
+        "feature_fields_checked": [
+          "regime",
+          "regime_name",
+          "regime_confidence",
+          "session",
+          "session_id",
+          "pos_in_session_range",
+          "inside_value",
+          "above_value",
+          "below_value",
+          "direction",
+          "z_t"
+        ],
+        "leaked_features": [],
+        "raw_fields_with_outcomes": [
+          "hit",
+          "label",
+          "outcome_rr"
+        ],
+        "suspicious_fields_in_raw": [],
+        "note": "Outcome fields in raw data are OK (used for metrics only)"
+      }
+    },
+    {
+      "test": "T4_PolicyConsistency_P0_baseline_all",
+      "passed": true,
+      "details": {
+        "policy_name": "P0_baseline_all",
+        "n_trades": 5,
+        "consistent": true
+      }
+    },
+    {
+      "test": "T4_PolicyConsistency_P1_regime_trend_down",
+      "passed": true,
+      "details": {
+        "policy_name": "P1_regime_trend_down",
+        "n_trades": 5,
+        "consistent": true
+      }
+    },
+    {
+      "test": "T4_PolicyConsistency_P2_regime_no_balance",
+      "passed": true,
+      "details": {
+        "policy_name": "P2_regime_no_balance",
+        "n_trades": 5,
+        "consistent": true
+      }
+    }
+  ]
+}

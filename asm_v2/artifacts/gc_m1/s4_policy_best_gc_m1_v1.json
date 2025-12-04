@@ -1,0 +1,51 @@
+{
+  "policy_name": "P7_direction_aligned",
+  "train": {
+    "split_name": "train",
+    "n_trades": 67,
+    "win_count": 38,
+    "loss_count": 26,
+    "be_count": 3,
+    "win_rate": 0.59375,
+    "expectancy": 1.0719402985074626,
+    "std_rr": 1.753935176237233,
+    "max_drawdown_r": 2.999999999999999,
+    "profit_factor": 3.7654986522911056,
+    "sharpe_like": 0.6111630082059969,
+    "cum_r_final": 71.82000000000004,
+    "n_skipped": 57,
+    "skip_rate": 0.4596774193548387
+  },
+  "val": {
+    "split_name": "val",
+    "n_trades": 15,
+    "win_count": 9,
+    "loss_count": 6,
+    "be_count": 0,
+    "win_rate": 0.6,
+    "expectancy": 1.0493333333333332,
+    "std_rr": 1.712506378159829,
+    "max_drawdown_r": 2.84,
+    "profit_factor": 3.7091222030981066,
+    "sharpe_like": 0.6127471095674941,
+    "cum_r_final": 15.739999999999998,
+    "n_skipped": 19,
+    "skip_rate": 0.5588235294117647
+  },
+  "test": {
+    "split_name": "test",
+    "n_trades": 23,
+    "win_count": 13,
+    "loss_count": 8,
+    "be_count": 2,
+    "win_rate": 0.6190476190476191,
+    "expectancy": 1.0795652173913044,
+    "std_rr": 1.6895843444223186,
+    "max_drawdown_r": 3.669999999999998,
+    "profit_factor": 4.245751633986927,
+    "sharpe_like": 0.6389531371755316,
+    "cum_r_final": 24.83,
+    "n_skipped": 19,
+    "skip_rate": 0.4523809523809524
+  }
+}

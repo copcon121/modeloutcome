@@ -1,0 +1,35 @@
+{
+  "input_dim": 88,
+  "d_model": 64,
+  "num_heads": 4,
+  "num_layers": 4,
+  "dim_feedforward": 256,
+  "dropout": 0.05,
+  "sequence_length": 64,
+  "pooling": "last",
+  "conv_kernel": 5,
+  "use_rms_norm": false,
+  "heads": {
+    "mfm": {
+      "enabled": true,
+      "output_dim": 95
+    },
+    "contrastive": {
+      "enabled": true,
+      "proj_dim": 96
+    },
+    "self_supervised": {
+      "enabled": true,
+      "num_dir_classes": 3,
+      "predict_return": true
+    },
+    "regime": {
+      "enabled": true,
+      "num_classes": 6
+    },
+    "meta_s4": {
+      "enabled": false,
+      "output_dim": 4
+    }
+  }
+}

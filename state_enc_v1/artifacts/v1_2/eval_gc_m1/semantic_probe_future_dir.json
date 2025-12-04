@@ -1,0 +1,32 @@
+{
+  "baseline_raw": {
+    "accuracy": 0.5354609929078015,
+    "macro_f1": 0.263467323962759,
+    "features_used": [
+      "c",
+      "hl_range",
+      "body",
+      "delta",
+      "volume",
+      "inside_value",
+      "dist_to_vah",
+      "dist_to_val",
+      "ext_trend_dir",
+      "int_trend_dir"
+    ],
+    "n_train": 3382,
+    "n_val": 846
+  },
+  "probe_z_t": {
+    "accuracy": 0.5401891252955082,
+    "macro_f1": 0.27256771894389215,
+    "z_t_dim": 64,
+    "n_train": 3382,
+    "n_val": 846
+  },
+  "comparison": {
+    "accuracy_improvement_pct": 0.8830021910149947,
+    "f1_improvement_pct": 3.4540885369946728,
+    "z_t_better": true
+  }
+}

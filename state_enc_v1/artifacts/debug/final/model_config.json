@@ -1,0 +1,26 @@
+{
+  "input_dim": 88,
+  "d_model": 64,
+  "num_heads": 4,
+  "num_layers": 2,
+  "dim_feedforward": 128,
+  "dropout": 0.1,
+  "sequence_length": 64,
+  "pooling": "last",
+  "positional_encoding": "sinusoidal",
+  "heads": {
+    "self_supervised": {
+      "enabled": true,
+      "num_dir_classes": 3,
+      "predict_return": true
+    },
+    "regime": {
+      "enabled": true,
+      "num_classes": 6
+    },
+    "meta_s4": {
+      "enabled": false,
+      "output_dim": 4
+    }
+  }
+}

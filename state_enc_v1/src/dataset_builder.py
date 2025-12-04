@@ -406,6 +406,17 @@ def build_state_enc_dataset(raw_bars_path: str,
     
     logger.info(f"Built {len(all_samples)} samples total")
     
+    # Limit samples if max_samples is set
+    if config.max_samples and len(all_samples) > config.max_samples:
+        logger.info(f"Limiting to {config.max_samples} samples (from {len(all_samples)})")
+        all_samples = all_samples[:config.max_samples]
+        # Recalculate dir_counts
+        dir_counts = {-1: 0, 0: 0, 1: 0}
+        session_counts = defaultdict(int)
+        for s in all_samples:
+            dir_counts[s["aux"]["future_dir_5"]] += 1
+            session_counts[s["session"]] += 1
+    
     # Fit normalizer on all bars
     logger.info("Fitting normalizer...")
     all_bars_flat = []
@@ -415,27 +426,26 @@ def build_state_enc_dataset(raw_bars_path: str,
     normalizer = FeatureNormalizer()
     normalizer.fit(all_bars_flat)
     
-    # Save normalizer config
+    # Save normalizer config (v1.1 compatible)
     feature_config = {
+        "version": "1.1",
         "feature_names": get_feature_names(),
         "feature_dim": len(get_feature_names()),
-        "normalization": {
-            "config": {
-                "method": normalizer.config.method,
-                "clip_zscore": normalizer.config.clip_zscore,
-                "eps": normalizer.config.eps
-            },
-            "stats": {
-                name: {
-                    "mean": s.mean,
-                    "std": s.std,
-                    "min_val": s.min_val,
-                    "max_val": s.max_val
-                }
-                for name, s in normalizer.stats.items()
-            },
-            "is_fitted": True
-        }
+        "clip_value": normalizer.clip_value,
+        "eps": normalizer.eps,
+        "stats": {
+            name: {
+                "mean": s.mean,
+                "std": s.std,
+                "median": s.median,
+                "iqr": s.iqr,
+                "min_val": s.min_val,
+                "max_val": s.max_val,
+                "count": s.count
+            }
+            for name, s in normalizer.stats.items()
+        },
+        "is_fitted": True
     }
     
     # Save feature config

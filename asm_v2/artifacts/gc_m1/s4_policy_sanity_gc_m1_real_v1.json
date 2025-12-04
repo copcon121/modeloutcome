@@ -1,0 +1,107 @@
+{
+  "all_passed": false,
+  "critical_failures": [],
+  "n_tests": 5,
+  "n_passed": 3,
+  "n_failed": 2,
+  "tests": [
+    {
+      "name": "T1_TimeSplitSanity",
+      "passed": true,
+      "severity": "info",
+      "details": {
+        "train_dates": 23,
+        "val_dates": 7,
+        "test_dates": 9,
+        "train_val_overlap": 0,
+        "val_test_overlap": 0,
+        "train_test_overlap": 0,
+        "chronological_order": true,
+        "train_samples": 38,
+        "val_samples": 16,
+        "test_samples": 19
+      }
+    },
+    {
+      "name": "T2_LabelShufflePolicy",
+      "passed": false,
+      "severity": "warning",
+      "details": {
+        "real_val_accuracy": 0.4375,
+        "shuffled_val_accuracy_avg": 0.4791666666666667,
+        "real_val_expectancy": 0.6600000000000001,
+        "shuffled_val_expectancy_avg": 0.7862500000000002,
+        "accuracy_margin": 0.02,
+        "n_iterations": 3
+      }
+    },
+    {
+      "name": "T3_FutureFieldGuard",
+      "passed": true,
+      "severity": "info",
+      "details": {
+        "feature_fields_checked": [
+          "regime_id",
+          "regime_name",
+          "regime_confidence",
+          "regime_onehot",
+          "session",
+          "session_id",
+          "pos_in_session_range",
+          "minute_of_day_norm",
+          "day_of_week_norm",
+          "inside_value",
+          "above_value",
+          "below_value",
+          "direction",
+          "z_t",
+          "setup_type"
+        ],
+        "leaked_features": [],
+        "raw_outcome_fields": [],
+        "note": "Outcome fields in raw data are OK (used for metrics only)"
+      }
+    },
+    {
+      "name": "T4_StabilityByWeek",
+      "passed": true,
+      "severity": "info",
+      "details": {
+        "skipped": true,
+        "reason": "Too few trades for weekly analysis"
+      }
+    },
+    {
+      "name": "T5_RegimeLeakGuard",
+      "passed": false,
+      "severity": "warning",
+      "details": {
+        "n_trades_checked": 73,
+        "n_issues": 73,
+        "issues": [
+          {
+            "trade_id": "s4_gc_real_00001",
+            "delta_sec": 999999
+          },
+          {
+            "trade_id": "s4_gc_real_00000",
+            "delta_sec": 999999
+          },
+          {
+            "trade_id": "s4_gc_real_00002",
+            "delta_sec": 999999
+          },
+          {
+            "trade_id": "s4_gc_real_00004",
+            "delta_sec": 999999
+          },
+          {
+            "trade_id": "s4_gc_real_00003",
+            "delta_sec": 999999
+          }
+        ],
+        "note": "Checks that regime is computed from context before entry"
+      }
+    }
+  ]
+}

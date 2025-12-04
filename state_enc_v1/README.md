@@ -163,3 +163,31 @@ with torch.no_grad():
 - `z_t`: Market state embedding [B, d_model]
 - `z_seq`: Full sequence embeddings [B, N, d_model]
 - Head outputs: logits for classification/regression tasks
+
+
+---
+
+## PHASE 3 — GC M1 NEW DATA OOS
+
+### Overview
+OOS evaluation trên 6 tuần dữ liệu mới (Apr-Jun 2025) sử dụng STATE-ENC v1.2 đã frozen.
+
+### Pipeline Commands
+
+```bash
+# 1. Build SMC features từ raw data
+python scripts/build_gc_m1_features_newdata.py
+
+# 2. Build encoder dataset từ bars_enhanced
+python state_enc_v1/scripts/build_encoder_dataset_gc_m1_newdata.py
+```
+
+### Artifacts
+```
+state_enc_v1/artifacts/gc_m1_new/
+├── bars_enhanced_gc_m1_newdata.jsonl          # SMC features (88+ per bar)
+└── encoder_dataset_gc_m1_newdata_v1.2.jsonl   # Encoder sequences
+```
+
+### Config
+- `state_enc_v1/configs/encoder_dataset_gc_m1_newdata_v1.2.json`

@@ -1,0 +1,69 @@
+{
+  "version": "1.2",
+  "timestamp": "2025-12-04T04:19:30.012331",
+  "training_time": 25.284589767456055,
+  "total_time": 35.333043575286865,
+  "parameters": 576735,
+  "z_t_dim": 64,
+  "samples": 43,
+  "best_val_loss": 0.0,
+  "tests_passed": 10,
+  "tests": {
+    "A": {
+      "pass": true,
+      "max_dist": 0.0
+    },
+    "B": {
+      "pass": true,
+      "median": 0.09540358781814576,
+      "max": 0.19423656463623046
+    },
+    "C": {
+      "pass": true,
+      "distance": 0.253882622718811,
+      "avg": 0.22672653198242188
+    },
+    "D": {
+      "pass": true,
+      "distances": {
+        "mask_20": 0.0838339626789093,
+        "mask_40": 0.11514841318130493
+      }
+    },
+    "E": {
+      "pass": true,
+      "min_separation": 0.5061033737731196
+    },
+    "F": {
+      "pass": true,
+      "asia_ldn": 0.17692320048809052
+    },
+    "G": {
+      "pass": true,
+      "sensitive": 2,
+      "reversed_dist": 0.10592069625854492,
+      "shuffled_dist": 0.12563009262084962,
+      "max_swap_dist": 0.06191444993019104
+    },
+    "H": {
+      "pass": true,
+      "top5": [
+        "tick_count",
+        "buy_volume",
+        "volume",
+        "sell_volume",
+        "l"
+      ]
+    },
+    "I": {
+      "pass": true,
+      "max_dev": 0.08592666387557983
+    },
+    "J": {
+      "pass": true,
+      "max_drift": 0.04514378309249878,
+      "avg_drift": 0.026470819488167763,
+      "variance": 0.001837948220781982
+    }
+  }
+}

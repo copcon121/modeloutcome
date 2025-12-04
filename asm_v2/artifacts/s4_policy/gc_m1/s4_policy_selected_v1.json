@@ -1,0 +1,8 @@
+{
+  "name": "P6_direction_aligned",
+  "expectancy": 2.0,
+  "win_rate": 1.0,
+  "n_trades": 3,
+  "max_drawdown_r": 0.0,
+  "profit_factor": Infinity
+}

@@ -1,0 +1,612 @@
+{
+  "version": "1.1",
+  "feature_names": [
+    "o",
+    "h",
+    "l",
+    "c",
+    "hl_range",
+    "body",
+    "upper_wick",
+    "lower_wick",
+    "bar_type",
+    "volume",
+    "volume_vs_session_avg",
+    "volume_zscore",
+    "atr_m1_14",
+    "true_range",
+    "range_vs_session_avg",
+    "delta",
+    "delta_abs",
+    "delta_sign",
+    "delta_vs_volume",
+    "cum_delta_session",
+    "delta_zscore_session",
+    "tick_count",
+    "tick_speed",
+    "buy_volume",
+    "sell_volume",
+    "buy_ratio",
+    "sell_ratio",
+    "imbalance_buy_sell",
+    "ext_trend_dir",
+    "int_trend_dir",
+    "ext_bos_up",
+    "ext_bos_down",
+    "ext_choch_up",
+    "ext_choch_down",
+    "bars_since_last_ext_bos",
+    "bars_since_last_ext_choch",
+    "int_bos_up",
+    "int_bos_down",
+    "int_choch_up",
+    "int_choch_down",
+    "bars_since_last_int_bos",
+    "bars_since_last_int_choch",
+    "swing_high",
+    "swing_low",
+    "price_vs_swing_mid",
+    "premium_zone",
+    "discount_zone",
+    "distance_to_swing_high",
+    "distance_to_swing_low",
+    "distance_to_swing_high_norm",
+    "distance_to_swing_low_norm",
+    "sweep_prev_high",
+    "sweep_prev_low",
+    "sweep_type",
+    "bars_since_last_sweep",
+    "near_ob_m1_bull",
+    "near_ob_m1_bear",
+    "near_ob_m5_bull",
+    "near_ob_m5_bear",
+    "ob_age_bars",
+    "distance_to_nearest_ob",
+    "near_fvg_m1_bull",
+    "near_fvg_m1_bear",
+    "near_fvg_m5_bull",
+    "near_fvg_m5_bear",
+    "fvg_age_bars",
+    "distance_to_nearest_fvg",
+    "vah",
+    "val",
+    "poc",
+    "dist_to_vah",
+    "dist_to_val",
+    "dist_to_poc",
+    "inside_value",
+    "above_value",
+    "below_value",
+    "session_high",
+    "session_low",
+    "pos_in_session_range",
+    "dist_to_session_high_norm",
+    "dist_to_session_low_norm",
+    "session_id",
+    "bar_index_in_session",
+    "bar_index_in_session_norm",
+    "minute_of_day",
+    "minute_of_day_norm",
+    "day_of_week",
+    "asm_regime_hint"
+  ],
+  "feature_dim": 88,
+  "clip_value": 5.0,
+  "eps": 1e-08,
+  "stats": {
+    "o": {
+      "mean": 17241.06265988372,
+      "std": 25.227780906692704,
+      "median": 17244.845,
+      "iqr": 43.660000009999855,
+      "min_val": 17196.06,
+      "max_val": 17287.85,
+      "count": 2752
+    },
+    "h": {
+      "mean": 17242.391664244187,
+      "std": 25.274953771327993,
+      "median": 17245.79,
+      "iqr": 43.960000010002766,
+      "min_val": 17196.92,
+      "max_val": 17288.82,
+      "count": 2752
+    },
+    "l": {
+      "mean": 17239.72789244186,
+      "std": 25.291488066009457,
+      "median": 17243.59,
+      "iqr": 43.340000010000146,
+      "min_val": 17194.21,
+      "max_val": 17287.18,
+      "count": 2752
+    },
+    "c": {
+      "mean": 17241.09506540698,
+      "std": 25.26273180608565,
+      "median": 17245.14,
+      "iqr": 43.412500010002184,
+      "min_val": 17194.51,
+      "max_val": 17288.82,
+      "count": 2752
+    },
+    "hl_range": {
+      "mean": 2.663771802325559,
+      "std": 1.2465877142234902,
+      "median": 2.4899999999979627,
+      "iqr": 1.7700000100040745,
+      "min_val": 0.37000000000261934,
+      "max_val": 7.979999999999563,
+      "count": 2752
+    },
+    "body": {
+      "mean": 0.032405523255743994,
+      "std": 1.0079560921077027,
+      "median": -0.029999999998835847,
+      "iqr": 1.2800000099997453,
+      "min_val": -3.110000000000582,
+      "max_val": 3.070000000003347,
+      "count": 2752
+    },
+    "upper_wick": {
+      "mean": 0.9151962209301463,
+      "std": 0.9117640677268006,
+      "median": 0.680000000000291,
+      "iqr": 1.3725000099994906,
+      "min_val": 0.0,
+      "max_val": 5.700000000000728,
+      "count": 2752
+    },
+    "lower_wick": {
+      "mean": 0.9533648255814746,
+      "std": 0.9526305940634011,
+      "median": 0.6899999999986903,
+      "iqr": 1.3400000100001455,
+      "min_val": 0.0,
+      "max_val": 5.259999999998399,
+      "count": 2752
+    },
+    "volume": {
+      "mean": 987.3978924418604,
+      "std": 313.0483905291092,
+      "median": 986.5,
+      "iqr": 430.00000001,
+      "min_val": 78.0,
+      "max_val": 2022.0,
+      "count": 2752
+    },
+    "volume_vs_session_avg": {
+      "mean": 0.9949520625835098,
+      "std": 0.31544928888183643,
+      "median": 0.9952269322763618,
+      "iqr": 0.4338196872212932,
+      "min_val": 0.078795114335568,
+      "max_val": 2.042611810083571,
+      "count": 2752
+    },
+    "volume_zscore": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "atr_m1_14": {
+      "mean": 3.9884847383720934,
+      "std": 1.0446180659234408,
+      "median": 3.94,
+      "iqr": 1.4100000099999996,
+      "min_val": 1.03,
+      "max_val": 7.75,
+      "count": 2752
+    },
+    "true_range": {
+      "mean": 2.663771802325559,
+      "std": 1.2465877142234902,
+      "median": 2.4899999999979627,
+      "iqr": 1.7700000100040745,
+      "min_val": 0.37000000000261934,
+      "max_val": 7.979999999999563,
+      "count": 2752
+    },
+    "range_vs_session_avg": {
+      "mean": 0.9995253354974576,
+      "std": 0.468127844473634,
+      "median": 0.9385474860336898,
+      "iqr": 0.6679334788141623,
+      "min_val": 0.13780260707732675,
+      "max_val": 2.972067039106007,
+      "count": 2752
+    },
+    "delta": {
+      "mean": 3.004723837209302,
+      "std": 240.53039664904543,
+      "median": 1.0,
+      "iqr": 360.00000001,
+      "min_val": -615.0,
+      "max_val": 752.0,
+      "count": 2752
+    },
+    "delta_abs": {
+      "mean": 198.92986918604652,
+      "std": 135.24351082769817,
+      "median": 181.5,
+      "iqr": 205.00000001,
+      "min_val": 0.0,
+      "max_val": 752.0,
+      "count": 2752
+    },
+    "delta_vs_volume": {
+      "mean": 0.004181543551808952,
+      "std": 0.23033626086326797,
+      "median": 0.0014144271570014145,
+      "iqr": 0.41526398321799884,
+      "min_val": -0.4008559201141227,
+      "max_val": 0.39740820734341253,
+      "count": 2752
+    },
+    "cum_delta_session": {
+      "mean": -891.5297965116279,
+      "std": 1965.0762295173845,
+      "median": -868.0,
+      "iqr": 2911.00000001,
+      "min_val": -4908.0,
+      "max_val": 3394.0,
+      "count": 2752
+    },
+    "delta_zscore_session": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "tick_count": {
+      "mean": 789.5243459302326,
+      "std": 250.42609065992792,
+      "median": 788.5,
+      "iqr": 344.00000001,
+      "min_val": 62.0,
+      "max_val": 1617.0,
+      "count": 2752
+    },
+    "tick_speed": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "buy_volume": {
+      "mean": 495.2013081395349,
+      "std": 196.77686321713014,
+      "median": 474.0,
+      "iqr": 250.00000001,
+      "min_val": 36.0,
+      "max_val": 1387.0,
+      "count": 2752
+    },
+    "sell_volume": {
+      "mean": 492.19658430232556,
+      "std": 198.0049225834881,
+      "median": 467.0,
+      "iqr": 266.00000001,
+      "min_val": 42.0,
+      "max_val": 1167.0,
+      "count": 2752
+    },
+    "buy_ratio": {
+      "mean": 0.5020907717759046,
+      "std": 0.11516813543163398,
+      "median": 0.5007072135785007,
+      "iqr": 0.20763199660899945,
+      "min_val": 0.2995720399429387,
+      "max_val": 0.6987041036717062,
+      "count": 2752
+    },
+    "sell_ratio": {
+      "mean": 0.49790922822409556,
+      "std": 0.11516813543163398,
+      "median": 0.49929278642149927,
+      "iqr": 0.20763199660899934,
+      "min_val": 0.30129589632829373,
+      "max_val": 0.7004279600570613,
+      "count": 2752
+    },
+    "imbalance_buy_sell": {
+      "mean": 0.004181543551808952,
+      "std": 0.23033626086326797,
+      "median": 0.0014144271570014145,
+      "iqr": 0.41526398321799884,
+      "min_val": -0.4008559201141227,
+      "max_val": 0.39740820734341253,
+      "count": 2752
+    },
+    "bars_since_last_ext_bos": {
+      "mean": 999.0,
+      "std": 1e-08,
+      "median": 999.0,
+      "iqr": 1e-08,
+      "min_val": 999.0,
+      "max_val": 999.0,
+      "count": 2752
+    },
+    "bars_since_last_ext_choch": {
+      "mean": 999.0,
+      "std": 1e-08,
+      "median": 999.0,
+      "iqr": 1e-08,
+      "min_val": 999.0,
+      "max_val": 999.0,
+      "count": 2752
+    },
+    "bars_since_last_int_bos": {
+      "mean": 999.0,
+      "std": 1e-08,
+      "median": 999.0,
+      "iqr": 1e-08,
+      "min_val": 999.0,
+      "max_val": 999.0,
+      "count": 2752
+    },
+    "bars_since_last_int_choch": {
+      "mean": 999.0,
+      "std": 1e-08,
+      "median": 999.0,
+      "iqr": 1e-08,
+      "min_val": 999.0,
+      "max_val": 999.0,
+      "count": 2752
+    },
+    "swing_high": {
+      "mean": 17271.06265988372,
+      "std": 25.227780906692704,
+      "median": 17274.845,
+      "iqr": 43.660000009999855,
+      "min_val": 17226.06,
+      "max_val": 17317.85,
+      "count": 2752
+    },
+    "swing_low": {
+      "mean": 17211.06265988372,
+      "std": 25.227780906692704,
+      "median": 17214.845,
+      "iqr": 43.660000009999855,
+      "min_val": 17166.06,
+      "max_val": 17257.85,
+      "count": 2752
+    },
+    "price_vs_swing_mid": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "distance_to_swing_high": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "distance_to_swing_low": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "distance_to_swing_high_norm": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "distance_to_swing_low_norm": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "bars_since_last_sweep": {
+      "mean": 999.0,
+      "std": 1e-08,
+      "median": 999.0,
+      "iqr": 1e-08,
+      "min_val": 999.0,
+      "max_val": 999.0,
+      "count": 2752
+    },
+    "ob_age_bars": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "distance_to_nearest_ob": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "fvg_age_bars": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "distance_to_nearest_fvg": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "vah": {
+      "mean": 17256.06265988372,
+      "std": 25.227780906692704,
+      "median": 17259.845,
+      "iqr": 43.660000009999855,
+      "min_val": 17211.06,
+      "max_val": 17302.85,
+      "count": 2752
+    },
+    "val": {
+      "mean": 17226.06265988372,
+      "std": 25.227780906692704,
+      "median": 17229.845,
+      "iqr": 43.660000009999855,
+      "min_val": 17181.06,
+      "max_val": 17272.85,
+      "count": 2752
+    },
+    "poc": {
+      "mean": 17241.06265988372,
+      "std": 25.227780906692704,
+      "median": 17244.845,
+      "iqr": 43.660000009999855,
+      "min_val": 17196.06,
+      "max_val": 17287.85,
+      "count": 2752
+    },
+    "dist_to_vah": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "dist_to_val": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "dist_to_poc": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "session_high": {
+      "mean": 17275.59767441861,
+      "std": 11.764650418865479,
+      "median": 17265.13,
+      "iqr": 23.69000000999869,
+      "min_val": 17265.13,
+      "max_val": 17288.82,
+      "count": 2752
+    },
+    "session_low": {
+      "mean": 17215.892093023253,
+      "std": 24.368568839170855,
+      "median": 17194.21,
+      "iqr": 49.07000000999971,
+      "min_val": 17194.21,
+      "max_val": 17243.28,
+      "count": 2752
+    },
+    "pos_in_session_range": {
+      "mean": 0.43288170837398166,
+      "std": 0.21240502268207553,
+      "median": 0.4161806767743662,
+      "iqr": 0.2670031076282165,
+      "min_val": 0.00021958717615364683,
+      "max_val": 1.0,
+      "count": 2752
+    },
+    "dist_to_session_high_norm": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "dist_to_session_low_norm": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "bar_index_in_session": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "bar_index_in_session_norm": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "minute_of_day": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    },
+    "minute_of_day_norm": {
+      "mean": 0.0,
+      "std": 1e-08,
+      "median": 0.0,
+      "iqr": 1e-08,
+      "min_val": 0.0,
+      "max_val": 0.0,
+      "count": 2752
+    }
+  },
+  "is_fitted": true
+}

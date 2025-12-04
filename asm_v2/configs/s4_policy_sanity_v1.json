@@ -1,0 +1,28 @@
+{
+  "version": "1.0",
+  "description": "S4_LDN Policy Sanity Test Configuration",
+  
+  "paths": {
+    "enriched_trades": "asm_v2/artifacts/gc_m1/s4_ldn_trades_enriched_v1.jsonl",
+    "output_report": "asm_v2/artifacts/s4_policy/gc_m1/s4_policy_sanity_report_v1.json"
+  },
+  
+  "tests": {
+    "time_split_sanity": {
+      "enabled": true,
+      "train_ratio": 0.8
+    },
+    "label_shuffle": {
+      "enabled": true,
+      "n_iterations": 3,
+      "margin": 0.02
+    },
+    "future_field_guard": {
+      "enabled": true
+    },
+    "policy_consistency": {
+      "enabled": true,
+      "n_policies_to_test": 3
+    }
+  }
+}

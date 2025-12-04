@@ -1,0 +1,46 @@
+{
+  "version": "1.2",
+  "input_dim": 88,
+  "d_model": 64,
+  "num_heads": 4,
+  "num_layers": 4,
+  "dim_feedforward": 256,
+  "dropout": 0.075,
+  "sequence_length": 64,
+  "pooling": "last",
+  "positional_encoding": "sinusoidal_scaled",
+  "heads": {
+    "self_supervised": {
+      "enabled": true,
+      "num_dir_classes": 3,
+      "predict_return": true
+    },
+    "regime": {
+      "enabled": true,
+      "num_classes": 6
+    },
+    "shock": {
+      "enabled": true,
+      "description": "Detect market shocks with attention-based head"
+    },
+    "reconstruct": {
+      "enabled": true,
+      "description": "Reconstruct masked features for robustness"
+    },
+    "order": {
+      "enabled": true,
+      "description": "Detect shuffled sequences for order sensitivity"
+    },
+    "anchor": {
+      "enabled": true,
+      "num_anchors": 4,
+      "description": "Multi-anchor latent drift control"
+    }
+  },
+  "architecture_changes_v1.2": {
+    "causal_conv": "Enhanced 2-layer causal conv with position-aware gating",
+    "grn": "Gated Residual Network instead of GEGLU FFN",
+    "latent_norm": "Light normalization preserving relative differences",
+    "sensitivity_gate": "Amplifies important features in output projection"
+  }
+}

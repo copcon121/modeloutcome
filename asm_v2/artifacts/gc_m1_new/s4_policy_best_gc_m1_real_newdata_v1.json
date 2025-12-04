@@ -1,0 +1,51 @@
+{
+  "policy_name": "P0_baseline_all",
+  "train": {
+    "split_name": "train",
+    "n_trades": 15,
+    "win_count": 6,
+    "loss_count": 8,
+    "be_count": 1,
+    "win_rate": 0.42857142857142855,
+    "expectancy": 0.33399999999999996,
+    "std_rr": 1.5659812076960384,
+    "max_drawdown_r": 5.86,
+    "profit_factor": 1.6349809885931559,
+    "sharpe_like": 0.21328480722409177,
+    "cum_r_final": 5.009999999999998,
+    "n_skipped": 0,
+    "skip_rate": 0.0
+  },
+  "val": {
+    "split_name": "val",
+    "n_trades": 4,
+    "win_count": 3,
+    "loss_count": 0,
+    "be_count": 1,
+    "win_rate": 1.0,
+    "expectancy": 1.7525000000000002,
+    "std_rr": 1.1333541664751876,
+    "max_drawdown_r": 0.0,
+    "profit_factor": Infinity,
+    "sharpe_like": 1.546295105130641,
+    "cum_r_final": 7.010000000000001,
+    "n_skipped": 0,
+    "skip_rate": 0.0
+  },
+  "test": {
+    "split_name": "test",
+    "n_trades": 5,
+    "win_count": 4,
+    "loss_count": 1,
+    "be_count": 0,
+    "win_rate": 0.8,
+    "expectancy": 1.668,
+    "std_rr": 1.4743032252559172,
+    "max_drawdown_r": 0.9100000000000001,
+    "profit_factor": 10.164835164835164,
+    "sharpe_like": 1.131381910739875,
+    "cum_r_final": 8.34,
+    "n_skipped": 0,
+    "skip_rate": 0.0
+  }
+}

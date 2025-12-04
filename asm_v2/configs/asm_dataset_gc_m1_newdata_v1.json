@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "description": "ASM v2 Dataset Config for GC M1 NEW DATA (OOS Phase 3)",
+  
+  "paths": {
+    "encoder_dataset": "state_enc_v1/artifacts/gc_m1_new/encoder_dataset_gc_m1_newdata_v1.2.jsonl",
+    "state_enc_model": "state_enc_v1/artifacts/v1_2/final/state_enc_v1.2.pt",
+    "state_enc_config": "state_enc_v1/artifacts/v1_2/final/model_config_v1.2.json",
+    "feature_config": "state_enc_v1/artifacts/v1_2/final/feature_config_v1.2.json",
+    "asm_model": "asm_v2/artifacts/final/asm_v2_gc_m1_v1.pt",
+    "asm_config": "asm_v2/artifacts/final/asm_model_config_v1.json",
+    "output_dir": "asm_v2/artifacts/gc_m1_new",
+    "asm_dataset": "asm_v2/artifacts/gc_m1_new/asm_dataset_gc_m1_newdata_v1.jsonl",
+    "regime_pred": "asm_v2/artifacts/gc_m1_new/asm_regime_pred_gc_m1_newdata_v1.jsonl"
+  },
+  
+  "mode": "inference_only",
+  "device": "cpu"
+}

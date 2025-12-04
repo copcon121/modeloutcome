@@ -1,0 +1,43 @@
+{
+  "version": "1.2",
+  "dataset_path": "state_enc_v1/artifacts/v1_2/encoder_dataset.jsonl",
+  "feature_config_path": "state_enc_v1/artifacts/v1_2/feature_config_v1.2.json",
+  "model_config_path": "state_enc_v1/configs/state_enc_model_v1.2.json",
+  "output_dir": "state_enc_v1/artifacts/v1_2/runs",
+  "batch_size": 16,
+  "max_epochs": 20,
+  "learning_rate": 0.0005,
+  "weight_decay": 0.01,
+  "warmup_epochs": 3,
+  "patience": 15,
+  "val_split": 0.15,
+  "test_split": 0.1,
+  "loss_weights": {
+    "future_dir": 1.0,
+    "future_return": 0.1,
+    "regime": 0.5,
+    "shock": 0.5,
+    "reconstruct": 0.2,
+    "order": 0.3,
+    "anchor": 0.3,
+    "diversity": 1.0,
+    "shock_contrast": 3.0,
+    "shock_l2": 2.0,
+    "order_contrast": 3.0,
+    "order_l2": 2.0
+  },
+  "augmentation": {
+    "feature_dropout_schedule": {
+      "epoch_1_2": 0.05,
+      "epoch_3_4": 0.10,
+      "epoch_5_plus": 0.20
+    },
+    "shock_injection_prob": 0.35,
+    "shuffle_prob": 0.4
+  },
+  "device": "cuda",
+  "seed": 42,
+  "num_workers": 4,
+  "save_every_n_epochs": 5,
+  "log_every_n_steps": 100
+}

@@ -1,0 +1,9 @@
+{
+  "model_path": "asm_v2/artifacts/final/asm_v2_gc_m1_v1.pt",
+  "model_config_path": "asm_v2/artifacts/final/asm_model_config_v1.json",
+  "feature_config_path": "asm_v2/artifacts/final/asm_feature_config_v1.json",
+  "dataset_path": "asm_v2/artifacts/gc_m1/asm_dataset_gc_m1_v1.jsonl",
+  "splits_path": "asm_v2/artifacts/gc_m1/splits_gc_m1_v1.json",
+  "output_dir": "asm_v2/artifacts/gc_m1",
+  "device": "cuda"
+}

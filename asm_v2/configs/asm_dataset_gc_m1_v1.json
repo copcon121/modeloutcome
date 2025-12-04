@@ -1,0 +1,20 @@
+{
+  "encoder_dataset_path": "state_enc_v1/artifacts/gc_m1/encoder_dataset_gc_m1_v1.2.jsonl",
+  "state_enc_model_path": "state_enc_v1/artifacts/v1_2/final/state_enc_v1.2.pt",
+  "state_enc_model_config_path": "state_enc_v1/artifacts/v1_2/final/model_config_v1.2.json",
+  "state_enc_feature_config_path": "state_enc_v1/artifacts/v1_2/final/feature_config_v1.2.json",
+  "output_path": "asm_v2/artifacts/gc_m1/asm_dataset_gc_m1_v1.jsonl",
+  "splits_output_path": "asm_v2/artifacts/gc_m1/splits_gc_m1_v1.json",
+  "feature_config_output_path": "asm_v2/artifacts/final/asm_feature_config_v1.json",
+  "symbol": "GC",
+  "timeframe": "M1",
+  "train_ratio": 0.8,
+  "meta_features": ["session_id", "pos_in_session_range", "inside_value", "above_value", "below_value", "minute_of_day_norm"],
+  "regime_mapping": {
+    "1": "trend_up",
+    "2": "trend_down",
+    "3": "balance",
+    "4": "opening_drive_up",
+    "5": "opening_drive_down"
+  }
+}

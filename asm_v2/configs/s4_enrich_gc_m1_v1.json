@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "description": "S4_LDN Trade Enrichment Configuration for GC M1",
+  
+  "paths": {
+    "raw_trades": "asm_v2/artifacts/gc_m1/s4_ldn_trades_raw_gc_m1.jsonl",
+    "standardized_trades": "asm_v2/artifacts/gc_m1/s4_ldn_trades_gc_m1_v1.jsonl",
+    "enriched_trades": "asm_v2/artifacts/gc_m1/s4_ldn_trades_enriched_gc_m1_v1.2.jsonl",
+    
+    "state_enc_model": "state_enc_v1/artifacts/v1_2/final/state_enc_v1.2.pt",
+    "state_enc_config": "state_enc_v1/artifacts/v1_2/final/model_config_v1.2.json",
+    "feature_config": "state_enc_v1/artifacts/v1_2/final/feature_config_v1.2.json",
+    
+    "asm_model": "asm_v2/artifacts/final/asm_v2_gc_m1_v1.pt",
+    "asm_config": "asm_v2/artifacts/final/asm_model_config_v1.json",
+    
+    "encoder_dataset": "state_enc_v1/artifacts/gc_m1/encoder_dataset_gc_m1_v1.2.jsonl"
+  },
+  
+  "trade_builder": {
+    "generate_if_missing": true,
+    "n_synthetic_trades": 200,
+    "symbol": "GC 12-25",
+    "start_date": "2025-09-01",
+    "end_date": "2025-11-30"
+  },
+  
+  "enricher": {
+    "device": "cpu",
+    "show_progress": true
+  }
+}

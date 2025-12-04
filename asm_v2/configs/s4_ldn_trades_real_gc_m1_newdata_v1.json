@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "description": "S4_LDN Real Trade Dataset Config for GC M1 NEW DATA (OOS Phase 3)",
+  
+  "paths": {
+    "raw_input": null,
+    "output": "asm_v2/artifacts/gc_m1_new/s4_ldn_trades_gc_m1_newdata_v1.jsonl"
+  },
+  
+  "builder": {
+    "generate_if_missing": true,
+    "n_trades": 80,
+    "min_rr": 0.0,
+    "date_range": ["2025-04-28", "2025-06-08"]
+  },
+  
+  "symbol": "GC 12-25",
+  "tf": "M1"
+}

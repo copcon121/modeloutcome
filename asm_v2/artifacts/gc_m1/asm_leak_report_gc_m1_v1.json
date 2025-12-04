@@ -1,0 +1,35 @@
+{
+  "L1_TimeSplit": {
+    "test": "L1_TimeSplit",
+    "passed": true,
+    "train_dates_count": 1984,
+    "val_dates_count": 497,
+    "overlap_count": 0,
+    "overlap_dates": []
+  },
+  "L2_LabelShuffle": {
+    "test": "L2_LabelShuffle",
+    "passed": true,
+    "num_classes": 3,
+    "label_distribution": {
+      "0": 101,
+      "1": 1426,
+      "2": 954
+    },
+    "note": "Full test requires training comparison"
+  },
+  "L3_FutureLeakGuard": {
+    "test": "L3_FutureLeakGuard",
+    "passed": true,
+    "meta_features": [
+      "session_id",
+      "pos_in_session_range",
+      "inside_value",
+      "above_value",
+      "below_value",
+      "minute_of_day_norm"
+    ],
+    "leaked_features": []
+  },
+  "all_passed": true
+}

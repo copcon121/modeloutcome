@@ -1,0 +1,71 @@
+{
+  "version": "1.0",
+  "description": "S4_LDN Policy Backtest Config for GC M1 NEW DATA (OOS Phase 3)",
+  
+  "paths": {
+    "enriched_trades": "asm_v2/artifacts/gc_m1_new/s4_ldn_trades_enriched_gc_m1_real_newdata_v1.2.jsonl",
+    "output_dir": "asm_v2/artifacts/gc_m1_new"
+  },
+  
+  "splits": {
+    "train_ratio": 0.6,
+    "val_ratio": 0.2,
+    "test_ratio": 0.2
+  },
+  
+  "backtest": {
+    "min_trades_for_valid_policy": 3,
+    "sort_by": "expectancy"
+  },
+  
+  "policies": [
+    {
+      "name": "P0_baseline_all",
+      "policy_type": "baseline",
+      "params": {}
+    },
+    {
+      "name": "P7_direction_aligned",
+      "policy_type": "direction_regime",
+      "params": {"strict": true, "allow_balance": false}
+    },
+    {
+      "name": "P8_direction_aligned_balance",
+      "policy_type": "direction_regime",
+      "params": {"strict": true, "allow_balance": true}
+    },
+    {
+      "name": "P1_regime_trend_down",
+      "policy_type": "regime_only",
+      "params": {"regimes": ["trend_down"]}
+    },
+    {
+      "name": "P3_regime_no_balance",
+      "policy_type": "regime_exclude",
+      "params": {"exclude_regimes": ["balance"]}
+    },
+    {
+      "name": "P4_session_ldn",
+      "policy_type": "session",
+      "params": {"sessions": ["LDN"]}
+    },
+    {
+      "name": "P11_short_trend_down",
+      "policy_type": "combo",
+      "params": {
+        "regimes": ["trend_down"],
+        "directions": ["short"]
+      }
+    }
+  ],
+  
+  "meta_model": {
+    "enabled": false
+  },
+  
+  "output_files": {
+    "league_json": "s4_policy_league_gc_m1_real_newdata_v1.json",
+    "league_csv": "s4_policy_league_gc_m1_real_newdata_v1.csv",
+    "best_policy": "s4_policy_best_gc_m1_real_newdata_v1.json"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "description": "S4_LDN Policy Sanity Test Configuration for GC M1",
+  
+  "paths": {
+    "enriched_trades": "asm_v2/artifacts/gc_m1/s4_ldn_trades_enriched_gc_m1_v1.2.jsonl",
+    "output_report": "asm_v2/artifacts/gc_m1/s4_policy_sanity_gc_m1_v1.json"
+  },
+  
+  "splits": {
+    "train_ratio": 0.6,
+    "val_ratio": 0.2,
+    "test_ratio": 0.2
+  },
+  
+  "tests": {
+    "T1_TimeSplitSanity": {
+      "enabled": true
+    },
+    "T2_LabelShufflePolicy": {
+      "enabled": true,
+      "n_iterations": 3
+    },
+    "T3_FutureFieldGuard": {
+      "enabled": true
+    },
+    "T4_StabilityByWeek": {
+      "enabled": true,
+      "threshold_multiplier": 2.0
+    }
+  }
+}
