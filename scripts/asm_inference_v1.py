@@ -4,6 +4,9 @@ ASM Inference v1.0
 ==================
 Load and run inference with ASM-GRU64-v1.0-C3 model.
 
+IMPORTANT: Input features must follow the exact order defined in:
+    src/asm_feature_spec.py -> ASM_FEATURE_COLS
+
 Usage:
     from scripts.asm_inference_v1 import ASMModelV1Loader
     
@@ -11,12 +14,17 @@ Usage:
     probs = loader.predict_proba(X_seq)  # X_seq: (60, 100) or (1, 60, 100)
 """
 
+import sys
 from pathlib import Path
 from typing import Dict, Union
 
 import numpy as np
 import torch
 import torch.nn as nn
+
+# Add project root to path for imports
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT))
 
 
 # ==============================================================================

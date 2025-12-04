@@ -2,7 +2,10 @@
 """
 Extended Validation: S4_HighVol_FVG_London + ASM LowShift on NEW DATA 6W
 ========================================================================
-Validate S4_LDN_ASM_LowShift_0.2_v1.0 strategy on out-of-sample new data.
+Validate S4_LDN_ASM_LowShift_0.2_v1.1 strategy on out-of-sample new data.
+
+v1.1 FIX: Uses unified ASM_FEATURE_COLS from src/asm_feature_spec.py
+          Previous v1.0 had feature mismatch bug (missing "close" at position 0)
 
 Data Source: data/raw/new_data/ (Apr 28 - Jun 02, 2025)
 Model: ASM-GRU64-v1.0-C3 (bar-only, 100 features)
@@ -31,6 +34,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from src.layer2_feature_engine_v2.context_manager import SMCContextManager
 from src.layer2_feature_engine_v2.config import GC_M1_SMC_CONFIG
 from src.layer2_feature_engine_v2.schema import RawBar
+from src.asm_feature_spec import ASM_FEATURE_COLS, ASM_SEQ_LEN, ASM_FEATURE_DIM
 from asm_inference_v1 import ASMModelV1Loader
 
 # ==============================================================================
@@ -41,8 +45,8 @@ from asm_inference_v1 import ASMModelV1Loader
 RAW_DATA_DIR = ROOT / "data/raw/new_data"
 FEATURES_OUTPUT_DIR = ROOT / "output/new_data_features_s4_asm"
 
-# Output
-OUTPUT_PATH = ROOT / "backtests/s4_asm_lowshift_extval_new6w_v1.json"
+# Output - v1.1 with fixed feature order
+OUTPUT_PATH = ROOT / "backtests/s4_asm_lowshift_extval_new6w_v1.1.json"
 
 # S4 Rule parameters
 S4_CONFIG = {
@@ -53,15 +57,10 @@ S4_CONFIG = {
     "max_bars_in_trade": 100,
 }
 
-# ASM parameters
-ASM_SEQ_LEN = 60
-ASM_FEATURE_DIM = 100
-
 # Filter thresholds to test
 P_SHIFT_THRESHOLDS = [0.15, 0.2, 0.25, 0.3]
 
-# Feature columns to exclude (metadata)
-EXCLUDE_COLS = ["timestamp", "bar_index", "global_bar_index", "_source_file", "open", "high", "low", "close"]
+# Note: ASM_SEQ_LEN, ASM_FEATURE_DIM, ASM_FEATURE_COLS imported from src.asm_feature_spec
 
 
 # ==============================================================================
@@ -188,19 +187,12 @@ def process_raw_files() -> pd.DataFrame:
 
 
 def get_feature_columns(df: pd.DataFrame, target_features: int = 100) -> List[str]:
-    """Get exactly N numeric feature columns (excluding metadata).
+    """Get fixed feature columns matching training data order.
     
-    If not enough features, pad with zeros later.
+    Uses ASM_FEATURE_COLS which matches the exact order from training.
     """
-    feature_cols = []
-    for col in df.columns:
-        if col in EXCLUDE_COLS or col.startswith("_"):
-            continue
-        if col.startswith("weekly_") or col.startswith("daily_va_"):
-            continue  # Skip Weekly VA features for ASM v1.0
-        if df[col].dtype in [np.float64, np.float32, np.int64, np.int32]:
-            feature_cols.append(col)
-    return feature_cols[:target_features]  # Return up to target_features
+    # Use fixed feature order from training data
+    return ASM_FEATURE_COLS[:target_features]
 
 
 def detect_session(hour: int) -> str:
@@ -288,19 +280,30 @@ def simulate_trade(df: pd.DataFrame, entry_idx: int, side: int, sl: float, tp: f
 
 
 def get_context_window(df: pd.DataFrame, idx: int, feature_cols: List[str], seq_len: int = 60, target_dim: int = 100) -> np.ndarray:
-    """Get context window for ASM inference.
+    """Get context window for ASM inference using fixed feature order.
     
-    Pads with zeros if not enough features to match target_dim.
+    Uses ASM_FEATURE_COLS to ensure correct feature order matching training.
+    Missing features are filled with 0.0.
     """
     if idx < seq_len:
         return None
     
-    context = df.iloc[idx - seq_len:idx][feature_cols].values.astype(np.float32)
+    # Build context using fixed feature order
+    context = []
+    for i in range(idx - seq_len, idx):
+        row = df.iloc[i]
+        # Get features in exact order, fill missing with 0.0
+        feature_row = [float(row.get(col, 0.0)) for col in feature_cols]
+        context.append(feature_row)
     
-    # Pad if needed
-    if context.shape[1] < target_dim:
-        padding = np.zeros((seq_len, target_dim - context.shape[1]), dtype=np.float32)
-        context = np.concatenate([context, padding], axis=1)
+    context = np.array(context, dtype=np.float32)
+    
+    # Safety check
+    assert context.shape == (seq_len, target_dim), \
+        f"ASM context shape mismatch: got {context.shape}, expected ({seq_len}, {target_dim})"
+    
+    # Handle NaN
+    context = np.nan_to_num(context, nan=0.0)
     
     return context
 
@@ -449,7 +452,7 @@ def run_extended_validation():
     # Step 6: Build output JSON
     output = {
         "meta": {
-            "strategy_id": "S4_LDN_ASM_LowShift_0.2_v1.0",
+            "strategy_id": "S4_LDN_ASM_LowShift_0.2_v1.1",
             "source_data": "data/raw/new_data",
             "data_period": "Apr 28 - Jun 02, 2025 (6W)",
             "asm_model": "ASM-GRU64-v1.0-C3.pt",

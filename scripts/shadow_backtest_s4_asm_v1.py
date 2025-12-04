@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """
-Shadow Backtest: S4_HighVol_FVG_London + ASM v1.0 Filter
+Shadow Backtest: S4_HighVol_FVG_London + ASM v1.1 Filter
 ========================================================
 Evaluate ASM-GRU64-v1.0-C3 as auction filter for S4 baseline strategy.
+
+v1.1 FIX: Uses unified ASM_FEATURE_COLS from src/asm_feature_spec.py
+          Previous v1.0 had feature mismatch bug (missing "close" at position 0)
 
 Usage:
     python scripts/shadow_backtest_s4_asm_v1.py
@@ -10,6 +13,7 @@ Usage:
 
 import json
 import glob
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -18,6 +22,13 @@ from dataclasses import dataclass, asdict
 import numpy as np
 import pandas as pd
 
+# Add project root to path
+ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT))
+
+from src.asm_feature_spec import ASM_FEATURE_COLS, ASM_SEQ_LEN, ASM_FEATURE_DIM
+
+sys.path.insert(0, str(ROOT / "scripts"))
 from asm_inference_v1 import ASMModelV1Loader
 
 # ==============================================================================
@@ -42,9 +53,7 @@ S4_CONFIG = {
     "max_bars_in_trade": 100,
 }
 
-# ASM parameters
-ASM_SEQ_LEN = 60
-ASM_FEATURE_DIM = 100  # Original ASM v1.0 uses 100 features (no Weekly VA)
+# Note: ASM_SEQ_LEN, ASM_FEATURE_DIM, ASM_FEATURE_COLS imported from src.asm_feature_spec
 
 # Threshold sweep - DIRECT FILTER (high p_shift)
 T_SHIFT_VALUES = [0.3, 0.4, 0.5, 0.6, 0.7]
@@ -55,9 +64,6 @@ T_SHIFT_MAX_VALUES = [0.2, 0.3, 0.4, 0.5]
 
 # Threshold sweep - NEUTRAL FILTER (high p_neutral)
 T_NEUTRAL_MIN_VALUES = [0.5, 0.6, 0.7, 0.8]
-
-# Feature columns to exclude (metadata)
-EXCLUDE_COLS = ["timestamp", "bar_index", "_source_file"]
 
 
 # ==============================================================================
@@ -118,18 +124,11 @@ def load_feature_data(data_paths: List[str]) -> pd.DataFrame:
 
 
 def get_feature_columns(df: pd.DataFrame, max_features: int = 100) -> List[str]:
-    """Get first N numeric feature columns (excluding metadata)."""
-    feature_cols = []
-    for col in df.columns:
-        if col in EXCLUDE_COLS or col.startswith("_"):
-            continue
-        if col.startswith("weekly_") or col.startswith("daily_va_"):
-            continue  # Skip Weekly VA features for ASM v1.0
-        if df[col].dtype in [np.float64, np.float32, np.int64, np.int32]:
-            feature_cols.append(col)
-        if len(feature_cols) >= max_features:
-            break
-    return feature_cols
+    """Get fixed feature columns matching training data order.
+    
+    Uses ASM_FEATURE_COLS from src.asm_feature_spec for consistency.
+    """
+    return ASM_FEATURE_COLS[:max_features]
 
 
 def detect_session(hour: int) -> str:
@@ -235,12 +234,32 @@ def simulate_trade(df: pd.DataFrame, entry_idx: int, side: int, sl: float, tp: f
 
 
 def get_context_window(df: pd.DataFrame, idx: int, feature_cols: List[str], seq_len: int = 60) -> np.ndarray:
-    """Get context window for ASM inference."""
+    """Get context window for ASM inference using fixed feature order.
+    
+    Uses ASM_FEATURE_COLS to ensure correct feature order matching training.
+    Missing features are filled with 0.0.
+    """
     if idx < seq_len:
         return None
     
-    context = df.iloc[idx - seq_len:idx][feature_cols].values
-    return context.astype(np.float32)
+    # Build context using fixed feature order
+    context = []
+    for i in range(idx - seq_len, idx):
+        row = df.iloc[i]
+        # Get features in exact order, fill missing with 0.0
+        feature_row = [float(row.get(col, 0.0)) for col in feature_cols]
+        context.append(feature_row)
+    
+    context = np.array(context, dtype=np.float32)
+    
+    # Safety check
+    assert context.shape == (seq_len, len(feature_cols)), \
+        f"ASM context shape mismatch: got {context.shape}, expected ({seq_len}, {len(feature_cols)})"
+    
+    # Handle NaN
+    context = np.nan_to_num(context, nan=0.0)
+    
+    return context
 
 
 def calculate_stats(trades: List[S4Trade]) -> Dict:

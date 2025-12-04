@@ -1,0 +1,8 @@
+# Placeholder for artifacts directory
+# Generated files:
+# - encoder_dataset.jsonl
+# - feature_config.json
+# - runs/*/
+# - final/state_enc_v1.pt
+# - final/model_config.json
+# - final/feature_config.json
